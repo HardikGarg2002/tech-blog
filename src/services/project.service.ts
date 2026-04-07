@@ -2,6 +2,8 @@ import { z } from "zod";
 import { uniqueSlug } from "@/lib/slugify";
 import { Errors } from "@/lib/errors";
 import * as projectRepo from "@/repositories/project.repository";
+import * as itemRepo from "@/repositories/projectItem.repository";
+import * as sectionRepo from "@/repositories/projectSection.repository";
 
 export async function getAllProjectSlugs() {
   return projectRepo.findAllProjectSlugs();
@@ -39,6 +41,11 @@ export async function getAllProjects() {
   return projectRepo.findAllProjects();
 }
 
+/** Public listings: excludes archived projects (direct /projects/[slug] URLs still work). */
+export async function getListedProjects() {
+  return projectRepo.findListedProjects();
+}
+
 export async function getProject(slug: string) {
   const project = await projectRepo.findProjectBySlug(slug);
   if (!project) throw Errors.NOT_FOUND("Project", slug);
@@ -70,8 +77,24 @@ export async function updateProject(id: string, input: Partial<z.infer<typeof cr
   return projectRepo.findProjectById(id);
 }
 
-export async function deleteProject(id: string) {
+export async function archiveProject(id: string) {
   const project = await projectRepo.findProjectById(id);
   if (!project) throw Errors.NOT_FOUND("Project", id);
-  await projectRepo.deleteProject(id);
+  await projectRepo.archiveProject(id);
+}
+
+/** Admin project list with counts — keeps item/section access in the service layer. */
+export async function getAdminProjectsWithStats() {
+  const projects = await projectRepo.findAllProjects();
+  return Promise.all(
+    projects.map(async (project) => {
+      const [items, sections] = await Promise.all([
+        itemRepo.findItemsByProject(project.id),
+        sectionRepo.findSectionsByProject(project.id),
+      ]);
+      const docCount = items.filter((i) => i.type === "DOC").length;
+      const postCount = items.filter((i) => i.type === "POST").length;
+      return { ...project, docCount, postCount, sectionCount: sections.length };
+    })
+  );
 }

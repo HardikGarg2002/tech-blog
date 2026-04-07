@@ -1,5 +1,15 @@
 import type { Post, Category, Tag, Project, ProjectItem, ProjectSection } from "@prisma/client";
 
+export type {
+  AdminSectionOption,
+  AdminProjectSummaryFromApi,
+  AdminProjectIdSlug,
+  AdminProjectItemApiRow,
+  AdminDocItemFromItemsApi,
+  AdminUnlinkedPostOption,
+  AdminPromotePostModalProps,
+} from "./admin";
+
 export type PostWithRelations = Post & {
   categories: {
     category: Category;

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { PostStatus, PostType, Prisma } from "@prisma/client";
+import { PostStatus, Prisma } from "@prisma/client";
+import type { PostType } from "@/types/domain";
 
 export type PostFindManyArgs = {
   status?: PostStatus;

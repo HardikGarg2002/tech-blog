@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ProjectStatus } from "@prisma/client";
 
 export async function findAllCategories() {
   return prisma.category.findMany({
@@ -28,6 +29,7 @@ export async function findCategoryBySlug(slug: string) {
         },
       },
       projects: {
+        where: { project: { status: { not: ProjectStatus.ARCHIVED } } },
         include: {
           project: {
             include: {
@@ -49,6 +51,7 @@ export async function findPublishedDocItemsByCategory(categoryId: string) {
       status: "PUBLISHED",
       project: {
         categories: { some: { categoryId } },
+        status: { not: ProjectStatus.ARCHIVED },
       },
     },
     include: {

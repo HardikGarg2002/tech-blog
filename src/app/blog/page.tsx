@@ -1,21 +1,12 @@
-import { PostType } from "@prisma/client";
 import { listPosts } from "@/services/post.service";
 import { PostCard } from "@/components/blog/PostCard";
 import { ProjectBadge } from "@/components/project/ProjectBadge";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { PostWithRelations } from "@/types";
+import { POST_TYPES, parsePostType } from "@/types/domain";
 
 export const revalidate = 60;
-
-const POST_TYPES = ["CONCEPT", "TOOL", "PROJECT_WRITEUP"] as const;
-
-function parsePostType(value: string | undefined): PostType | undefined {
-  if (!value) return undefined;
-  return (Object.values(PostType) as string[]).includes(value)
-    ? (value as PostType)
-    : undefined;
-}
 
 export default async function BlogPage(props: {
   searchParams: Promise<{ type?: string; linked?: string }>;

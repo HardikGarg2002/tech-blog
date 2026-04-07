@@ -1,8 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, ProjectStatus } from "@prisma/client";
 
 export async function findAllProjects() {
   return prisma.project.findMany({
+    include: { categories: { include: { category: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/** Projects shown on /projects, search, and public API — archived are hidden but URLs stay valid. */
+export async function findListedProjects() {
+  return prisma.project.findMany({
+    where: { status: { not: ProjectStatus.ARCHIVED } },
     include: { categories: { include: { category: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -30,8 +39,11 @@ export async function updateProject(id: string, data: Prisma.ProjectUncheckedUpd
   return prisma.project.update({ where: { id }, data });
 }
 
-export async function deleteProject(id: string) {
-  return prisma.project.delete({ where: { id } });
+export async function archiveProject(id: string) {
+  return prisma.project.update({
+    where: { id },
+    data: { status: ProjectStatus.ARCHIVED },
+  });
 }
 
 export async function findAllProjectSlugs() {

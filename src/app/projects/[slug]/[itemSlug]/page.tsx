@@ -9,14 +9,13 @@ import { ProjectItemNav } from "@/components/project/ProjectItemNav";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { ProjectItemType } from "@prisma/client";
-import { findAllPublishedItems } from "@/repositories/projectItem.repository";
+import { getAllPublishedProjectItemParams } from "@/services/projectItem.service";
 import { ProjectItemWithRelations, ProjectSectionWithItems } from "@/types";
 
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const allItems = await findAllPublishedItems();
+  const allItems = await getAllPublishedProjectItemParams();
 
   return allItems.map((item) => ({
     slug: item.project.slug,
@@ -53,7 +52,7 @@ export default async function ProjectItemPage(props: {
   const prev = currentIdx > 0 ? flat[currentIdx - 1] : null;
   const next = currentIdx < flat.length - 1 ? flat[currentIdx + 1] : null;
 
-  if (item.type === ProjectItemType.DOC) {
+  if (item.type === "DOC") {
     const { content } = await processMDX(item.body ?? "");
 
     return (

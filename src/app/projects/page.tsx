@@ -1,4 +1,4 @@
-import { getAllProjects } from "@/services/project.service";
+import { getListedProjects } from "@/services/project.service";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import Link from "next/link";
 export const revalidate = 60;
 
 export default async function ProjectsPage() {
-  const projects = await getAllProjects();
+  const projects = await getListedProjects();
 
   return (
     <div className="container py-10">

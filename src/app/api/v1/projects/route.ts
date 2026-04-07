@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getAllProjects } from "@/services/project.service";
+import { getListedProjects } from "@/services/project.service";
 import { AppError } from "@/lib/errors";
 
 export async function GET() {
   try {
-    const projects = await getAllProjects();
+    const projects = await getListedProjects();
     return NextResponse.json({ data: projects });
   } catch (err) {
     if (err instanceof AppError)

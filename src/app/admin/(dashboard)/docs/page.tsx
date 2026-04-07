@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { getAllDocItems } from "@/services/projectItem.service";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,12 +5,10 @@ import Link from "next/link";
 import { Edit } from "lucide-react";
 import { format } from "date-fns";
 
-type DocItemRow = Prisma.ProjectItemGetPayload<{
-  include: { project: true; section: true };
-}>;
+type DocItemRow = Awaited<ReturnType<typeof getAllDocItems>>[number];
 
 export default async function AdminDocsPage() {
-  const docs = (await getAllDocItems()) as DocItemRow[];
+  const docs = await getAllDocItems();
 
   return (
     <div className="flex flex-col gap-6">

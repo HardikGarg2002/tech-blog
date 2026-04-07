@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
-import { ProjectItemWithRelations } from "@/types";
-import { Project } from "@prisma/client";
+import { ProjectItemWithRelations, ProjectWithRelations } from "@/types";
 
 interface DocItemCardProps {
-  item: ProjectItemWithRelations & { project: Project };
+  item: ProjectItemWithRelations & {
+    project: Pick<ProjectWithRelations, "id" | "name" | "slug">;
+  };
 }
 
 export function DocItemCard({ item }: DocItemCardProps) {

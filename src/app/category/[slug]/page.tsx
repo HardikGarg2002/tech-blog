@@ -10,11 +10,10 @@ import { DocItemCard } from "@/components/project/DocItemCard";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { AppError } from "@/lib/errors";
-import { PostStatus, ProjectItemType } from "@prisma/client";
+import type { ProjectItemType } from "@/types/domain";
 import { PostWithRelations } from "@/types";
 import { ProjectWithRelations } from "@/types";
 import { ProjectItemWithRelations } from "@/types";
-import { Project } from "@prisma/client";
 
 export const revalidate = 300;
 
@@ -48,18 +47,20 @@ export default async function CategoryPage(props: {
 
   const posts = category.posts
     .map((cp) => cp.post)
-    .filter((p) => p.status === PostStatus.PUBLISHED) as PostWithRelations[];
+    .filter((p) => p.status === "PUBLISHED") as PostWithRelations[];
 
   const projects: ProjectForCategory[] = (category.projects ?? []).map((cp) => {
     const p = cp.project;
     const items = p.items ?? [];
-    const docCount = items.filter((i) => i.type === ProjectItemType.DOC).length;
-    const postCount = items.filter((i) => i.type === ProjectItemType.POST).length;
+    const docCount = items.filter((i) => i.type === "DOC").length;
+    const postCount = items.filter((i) => i.type === "POST").length;
     return { ...p, items, docCount, postCount };
   });
 
   const docItems = await getDocItemsForCategory(category.id);
-  const docItemsForCards = docItems as (ProjectItemWithRelations & { project: Project })[];
+  const docItemsForCards = docItems as (ProjectItemWithRelations & {
+    project: ProjectWithRelations;
+  })[];
 
   return (
     <div className="container py-10">

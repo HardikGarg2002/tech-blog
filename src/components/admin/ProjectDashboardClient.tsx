@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,122 +16,68 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+import type {
+  AdminProjectItemApiRow,
+  AdminProjectSummaryFromApi,
+  AdminSectionOption,
+} from "@/types";
+import {
+  createProjectDocItem,
+  createProjectSection,
+  deleteProjectItem,
+  deleteProjectSection,
+  publishProjectItem,
+  refreshProjectSidebarItems,
+} from "@/actions/admin-projects";
 
-interface Section {
-  id: string;
-  title: string;
-  order: number;
-}
+type Props = {
+  projectId: string;
+  initialProject: AdminProjectSummaryFromApi;
+  initialItems: AdminProjectItemApiRow[];
+  initialSections: AdminSectionOption[];
+};
 
-interface Item {
-  id: string;
-  type: "DOC" | "POST";
-  status: string;
-  slug: string;
-  order: number;
-  title: string | null;
-  sectionId: string | null;
-  post?: { title: string; slug: string } | null;
-  section?: { title: string; order?: number } | null;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  status: string;
-  repoUrl: string | null;
-  liveUrl: string | null;
-  techStack: string[];
-  categories: { category: { id: string; name: string } }[];
-}
-
-export default function ProjectDashboardPage() {
-  const params = useParams<{ id: string }>();
-  const projectId = params.id;
-
-  const [project, setProject] = useState<Project | null>(null);
-  const [items, setItems] = useState<Item[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
-  const [loading, setLoading] = useState(true);
+export function ProjectDashboardClient({
+  projectId,
+  initialProject,
+  initialItems,
+  initialSections,
+}: Props) {
+  const [project] = useState(initialProject);
+  const [items, setItems] = useState(initialItems);
+  const [sections, setSections] = useState(initialSections);
   const [promoteOpen, setPromoteOpen] = useState(false);
 
-  // New doc item form state
   const [addDocOpen, setAddDocOpen] = useState(false);
   const [docTitle, setDocTitle] = useState("");
   const [docBody, setDocBody] = useState("");
   const [docSectionId, setDocSectionId] = useState("");
   const [addingDoc, setAddingDoc] = useState(false);
 
-  // New section form state
   const [addSectionOpen, setAddSectionOpen] = useState(false);
   const [sectionTitle, setSectionTitle] = useState("");
   const [addingSection, setAddingSection] = useState(false);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      try {
-        const projectsRes = await fetch("/api/v1/projects");
-        const projectsData = await projectsRes.json();
-        const proj = (projectsData.data ?? []).find((p: Project) => p.id === projectId);
-        setProject(proj ?? null);
-
-        if (!proj) {
-          setItems([]);
-          setSections([]);
-          return;
-        }
-
-        const itemsRes = await fetch(`/api/v1/projects/${proj.slug}/items`);
-        const itemsData = await itemsRes.json();
-        setItems(itemsData.data ?? []);
-
-        const sectionById = new Map<string, Section>();
-        for (const item of (itemsData.data ?? []) as Item[]) {
-          if (item.sectionId && item.section) {
-            sectionById.set(item.sectionId, {
-              id: item.sectionId,
-              title: item.section.title,
-              order: item.section.order ?? 0,
-            });
-          }
-        }
-        setSections(Array.from(sectionById.values()));
-      } catch {
-        toast.error("Failed to load data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, [projectId]);
-
   const handlePublish = async (itemId: string) => {
-    const res = await fetch(`/api/v1/admin/projects/${projectId}/items/${itemId}/publish`, {
-      method: "POST",
-    });
-    if (res.ok) {
+    const result = await publishProjectItem(projectId, itemId);
+    if (result.ok) {
       toast.success("Item published");
       setItems((prev) =>
-        prev.map((i) => (i.id === itemId ? { ...i, status: "PUBLISHED" } : i))
+        prev.map((i) => (i.id === itemId ? { ...i, status: "PUBLISHED" } : i)),
       );
     } else {
-      toast.error("Failed to publish");
+      toast.error(result.error);
     }
   };
 
   const handleDelete = async (itemId: string) => {
     if (!confirm("Delete this item?")) return;
-    const res = await fetch(`/api/v1/admin/projects/${projectId}/items/${itemId}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
+    const result = await deleteProjectItem(projectId, itemId);
+    if (result.ok) {
       toast.success("Deleted");
       setItems((prev) => prev.filter((i) => i.id !== itemId));
     } else {
-      toast.error("Failed to delete");
+      toast.error(result.error);
     }
   };
 
@@ -143,26 +88,21 @@ export default function ProjectDashboardPage() {
     }
     setAddingDoc(true);
     try {
-      const res = await fetch(`/api/v1/admin/projects/${projectId}/items`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: docTitle,
-          body: docBody,
-          sectionId: docSectionId || undefined,
-        }),
+      const result = await createProjectDocItem(projectId, {
+        title: docTitle,
+        body: docBody,
+        sectionId: docSectionId || undefined,
       });
-      if (res.ok) {
-        const data = await res.json();
-        setItems((prev) => [...prev, data.data]);
+      if (result.ok) {
+        const refreshed = await refreshProjectSidebarItems(projectId);
+        if (refreshed.ok) setItems(refreshed.data);
         setDocTitle("");
         setDocBody("");
         setDocSectionId("");
         setAddDocOpen(false);
         toast.success("Doc page added");
       } else {
-        const err = await res.json();
-        toast.error(err.error?.message ?? "Failed to add doc");
+        toast.error(result.error);
       }
     } finally {
       setAddingDoc(false);
@@ -176,20 +116,14 @@ export default function ProjectDashboardPage() {
     }
     setAddingSection(true);
     try {
-      const res = await fetch(`/api/v1/admin/projects/${projectId}/sections`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: sectionTitle }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSections((prev) => [...prev, data.data]);
+      const result = await createProjectSection(projectId, sectionTitle);
+      if (result.ok) {
+        setSections((prev) => [...prev, result.data]);
         setSectionTitle("");
         setAddSectionOpen(false);
         toast.success("Section added");
       } else {
-        const err = await res.json();
-        toast.error(err.error?.message ?? "Failed to add section");
+        toast.error(result.error);
       }
     } finally {
       setAddingSection(false);
@@ -198,29 +132,19 @@ export default function ProjectDashboardPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     if (!confirm("Delete this section? Items will become unsectioned.")) return;
-    const res = await fetch(`/api/v1/admin/projects/${projectId}/sections/${sectionId}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
+    const result = await deleteProjectSection(projectId, sectionId);
+    if (result.ok) {
       setSections((prev) => prev.filter((s) => s.id !== sectionId));
-      setItems((prev) => prev.map((i) => i.sectionId === sectionId ? { ...i, sectionId: null, section: null } : i));
+      setItems((prev) =>
+        prev.map((i) =>
+          i.sectionId === sectionId ? { ...i, sectionId: null, section: null } : i,
+        ),
+      );
       toast.success("Section deleted");
     } else {
-      toast.error("Failed to delete section");
+      toast.error(result.error);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!project) {
-    return <div className="py-20 text-center text-muted-foreground">Project not found.</div>;
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -238,7 +162,6 @@ export default function ProjectDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Sidebar manager */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Sidebar / Content</h2>
@@ -258,12 +181,16 @@ export default function ProjectDashboardPage() {
             </div>
           </div>
 
-          {/* Sections list */}
           {sections.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sections</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Sections
+              </p>
               {sections.map((section) => (
-                <div key={section.id} className="flex items-center justify-between p-3 border rounded-md bg-muted/30">
+                <div
+                  key={section.id}
+                  className="flex items-center justify-between p-3 border rounded-md bg-muted/30"
+                >
                   <span className="font-medium text-sm">{section.title}</span>
                   <Button
                     size="icon"
@@ -278,7 +205,6 @@ export default function ProjectDashboardPage() {
             </div>
           )}
 
-          {/* Items list */}
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 border-b">
@@ -358,7 +284,6 @@ export default function ProjectDashboardPage() {
             </table>
           </div>
 
-          {/* Add doc form */}
           {addDocOpen && (
             <div className="border rounded-lg p-4 flex flex-col gap-3 bg-muted/20">
               <h3 className="font-medium text-sm">New Doc Page</h3>
@@ -380,7 +305,9 @@ export default function ProjectDashboardPage() {
                   >
                     <option value="">No section</option>
                     {sections.map((s) => (
-                      <option key={s.id} value={s.id}>{s.title}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.title}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -406,7 +333,6 @@ export default function ProjectDashboardPage() {
             </div>
           )}
 
-          {/* Add section form */}
           {addSectionOpen && (
             <div className="border rounded-lg p-4 flex flex-col gap-3 bg-muted/20">
               <h3 className="font-medium text-sm">New Section</h3>
@@ -428,7 +354,6 @@ export default function ProjectDashboardPage() {
           )}
         </div>
 
-        {/* Right: Project metadata */}
         <div className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Project Info</h2>
           <div className="border rounded-lg p-4 flex flex-col gap-3 text-sm">
@@ -449,7 +374,9 @@ export default function ProjectDashboardPage() {
                 <p className="text-xs text-muted-foreground mb-1">Tech Stack</p>
                 <div className="flex flex-wrap gap-1">
                   {project.techStack.map((t) => (
-                    <Badge key={t} variant="outline" className="font-mono text-[10px]">{t}</Badge>
+                    <Badge key={t} variant="outline" className="font-mono text-[10px]">
+                      {t}
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -469,7 +396,12 @@ export default function ProjectDashboardPage() {
             {project.repoUrl && (
               <div>
                 <p className="text-xs text-muted-foreground">Repo</p>
-                <a href={project.repoUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs truncate block">
+                <a
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline text-xs truncate block"
+                >
                   {project.repoUrl}
                 </a>
               </div>
@@ -477,7 +409,12 @@ export default function ProjectDashboardPage() {
             {project.liveUrl && (
               <div>
                 <p className="text-xs text-muted-foreground">Live URL</p>
-                <a href={project.liveUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs truncate block">
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline text-xs truncate block"
+                >
                   {project.liveUrl}
                 </a>
               </div>
@@ -491,10 +428,9 @@ export default function ProjectDashboardPage() {
         onClose={() => setPromoteOpen(false)}
         projectId={projectId}
         sections={sections}
-        onSuccess={() => {
-          fetch(`/api/v1/projects/${project.slug}/items`)
-            .then((r) => r.json())
-            .then((d) => setItems(d.data ?? []));
+        onSuccess={async () => {
+          const r = await refreshProjectSidebarItems(projectId);
+          if (r.ok) setItems(r.data);
         }}
       />
     </div>

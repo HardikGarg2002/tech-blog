@@ -14,26 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, Search } from "lucide-react";
-
-interface UnlinkedPost {
-  id: string;
-  title: string;
-  slug: string;
-  type: string;
-}
-
-interface Section {
-  id: string;
-  title: string;
-}
-
-interface PromotePostModalProps {
-  open: boolean;
-  onClose: () => void;
-  projectId: string;
-  sections: Section[];
-  onSuccess: () => void;
-}
+import type { AdminPromotePostModalProps, AdminUnlinkedPostOption } from "@/types";
+import { listPromotablePosts, promotePostToProject } from "@/actions/admin-projects";
 
 export function PromotePostModal({
   open,
@@ -41,10 +23,10 @@ export function PromotePostModal({
   projectId,
   sections,
   onSuccess,
-}: PromotePostModalProps) {
-  const [posts, setPosts] = useState<UnlinkedPost[]>([]);
+}: AdminPromotePostModalProps) {
+  const [posts, setPosts] = useState<AdminUnlinkedPostOption[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedPost, setSelectedPost] = useState<UnlinkedPost | null>(null);
+  const [selectedPost, setSelectedPost] = useState<AdminUnlinkedPostOption | null>(null);
   const [sectionId, setSectionId] = useState("");
   const [order, setOrder] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,11 +35,12 @@ export function PromotePostModal({
   useEffect(() => {
     if (!open) return;
     setFetching(true);
-    fetch("/api/v1/posts?linkedProjectId=null&perPage=100")
-      .then((r) => r.json())
-      .then((d) => setPosts(d.data ?? []))
-      .catch(() => toast.error("Failed to load posts"))
-      .finally(() => setFetching(false));
+    void (async () => {
+      const res = await listPromotablePosts();
+      if (res.ok) setPosts(res.data);
+      else toast.error(res.error);
+      setFetching(false);
+    })();
   }, [open]);
 
   const filtered = posts.filter((p) =>
@@ -68,19 +51,14 @@ export function PromotePostModal({
     if (!selectedPost) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/admin/projects/${projectId}/items/promote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId: selectedPost.id,
-          sectionId: sectionId || undefined,
-          order: order ? Number(order) : undefined,
-        }),
+      const res = await promotePostToProject(projectId, {
+        postId: selectedPost.id,
+        sectionId: sectionId || undefined,
+        order: order ? Number(order) : undefined,
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message ?? "Failed to promote post");
+        throw new Error(res.error);
       }
 
       toast.success("Post added to project");

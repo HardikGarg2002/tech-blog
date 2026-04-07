@@ -1,26 +1,11 @@
-import { getAllProjects } from "@/services/project.service";
-import { findItemsByProject } from "@/repositories/projectItem.repository";
-import { findSectionsByProject } from "@/repositories/projectSection.repository";
+import { getAdminProjectsWithStats } from "@/services/project.service";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Settings, PlusCircle } from "lucide-react";
-import { ProjectItemType } from "@prisma/client";
 
 export default async function AdminProjectsPage() {
-  const projects = await getAllProjects();
-
-  const projectsWithStats = await Promise.all(
-    projects.map(async (project) => {
-      const [items, sections] = await Promise.all([
-        findItemsByProject(project.id),
-        findSectionsByProject(project.id),
-      ]);
-      const docCount = items.filter((i) => i.type === ProjectItemType.DOC).length;
-      const postCount = items.filter((i) => i.type === ProjectItemType.POST).length;
-      return { ...project, docCount, postCount, sectionCount: sections.length };
-    })
-  );
+  const projectsWithStats = await getAdminProjectsWithStats();
 
   return (
     <div className="flex flex-col gap-6">

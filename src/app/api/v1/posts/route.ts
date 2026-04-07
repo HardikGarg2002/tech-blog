@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PostType } from "@prisma/client";
 import { listPosts } from "@/services/post.service";
 import { AppError } from "@/lib/errors";
-
-function parsePostType(value: string | null): PostType | undefined {
-  if (!value) return undefined;
-  return (Object.values(PostType) as string[]).includes(value) ? (value as PostType) : undefined;
-}
+import { parsePostType } from "@/types/domain";
 
 export async function GET(req: NextRequest) {
   try {

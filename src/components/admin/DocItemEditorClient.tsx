@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,88 +8,36 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, Save, CheckCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import type { DocItemEditorPayload } from "@/actions/admin-projects";
+import {
+  publishDocItemFromEditor,
+  updateDocItemFields,
+} from "@/actions/admin-projects";
 
-interface Section {
-  id: string;
-  title: string;
-}
+type Props = {
+  projectId: string;
+  itemId: string;
+  initial: DocItemEditorPayload;
+};
 
-interface ProjectListEntry {
-  id: string;
-  slug: string;
-}
+export function DocItemEditorClient({ projectId, itemId, initial }: Props) {
+  const { item: initItem, sections: initialSections } = initial;
 
-interface ProjectItemListEntry {
-  id: string;
-  title: string | null;
-  slug: string;
-  body: string | null;
-  sectionId: string | null;
-  order: number;
-  status: string;
-  section?: { title: string } | null;
-}
-
-export default function DocItemEditorPage() {
-  const params = useParams<{ id: string; itemId: string }>();
-  const { id: projectId, itemId } = params;
-
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [body, setBody] = useState("");
-  const [sectionId, setSectionId] = useState("");
-  const [order, setOrder] = useState("");
-  const [status, setStatus] = useState("DRAFT");
-  const [sections, setSections] = useState<Section[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState(initItem.title);
+  const [slug, setSlug] = useState(initItem.slug);
+  const [body, setBody] = useState(initItem.body);
+  const [sectionId, setSectionId] = useState(initItem.sectionId);
+  const [order, setOrder] = useState(initItem.order);
+  const [status, setStatus] = useState(initItem.status);
+  const [sections] = useState(initialSections);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const titleBodyRef = useRef({ title: "", body: "" });
+  const titleBodyRef = useRef({ title: initItem.title, body: initItem.body });
 
   useEffect(() => {
     titleBodyRef.current = { title, body };
   }, [title, body]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const projectsRes = await fetch("/api/v1/projects").then((r) => r.json());
-        const project = (projectsRes.data ?? []).find(
-          (p: ProjectListEntry) => p.id === projectId
-        );
-
-        if (project) {
-          const itemsRes = await fetch(`/api/v1/projects/${project.slug}/items`).then((r) => r.json());
-          const allItems = (itemsRes.data ?? []) as ProjectItemListEntry[];
-
-          const item = allItems.find((i) => i.id === itemId);
-          if (item) {
-            setTitle(item.title ?? "");
-            setSlug(item.slug ?? "");
-            setBody(item.body ?? "");
-            setSectionId(item.sectionId ?? "");
-            setOrder(String(item.order ?? ""));
-            setStatus(item.status ?? "DRAFT");
-          }
-
-          // Extract sections
-          const sectionMap = new Map<string, Section>();
-          for (const i of allItems) {
-            if (i.section && i.sectionId) {
-              sectionMap.set(i.sectionId, { id: i.sectionId, title: i.section.title });
-            }
-          }
-          setSections(Array.from(sectionMap.values()));
-        }
-      } catch {
-        toast.error("Failed to load item");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [projectId, itemId]);
 
   const handleSave = useCallback(
     async (silent = false) => {
@@ -99,29 +46,24 @@ export default function DocItemEditorPage() {
 
       setSaving(true);
       try {
-        const res = await fetch(`/api/v1/admin/projects/${projectId}/items/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: t,
-            slug,
-            body: b,
-            sectionId: sectionId || null,
-            order: order ? Number(order) : undefined,
-          }),
+        const res = await updateDocItemFields(projectId, itemId, {
+          title: t,
+          slug,
+          body: b,
+          sectionId: sectionId || null,
+          order: order ? Number(order) : undefined,
         });
 
         if (res.ok) {
           if (!silent) toast.success("Saved");
         } else {
-          const err = await res.json();
-          toast.error(err.error?.message ?? "Failed to save");
+          toast.error(res.error);
         }
       } finally {
         setSaving(false);
       }
     },
-    [projectId, itemId, slug, sectionId, order]
+    [projectId, itemId, slug, sectionId, order],
   );
 
   useEffect(() => {
@@ -137,28 +79,17 @@ export default function DocItemEditorPage() {
   const handlePublish = async () => {
     setPublishing(true);
     try {
-      const res = await fetch(
-        `/api/v1/admin/projects/${projectId}/items/${itemId}/publish`,
-        { method: "POST" }
-      );
+      const res = await publishDocItemFromEditor(projectId, itemId);
       if (res.ok) {
         setStatus("PUBLISHED");
         toast.success("Published");
       } else {
-        toast.error("Failed to publish");
+        toast.error(res.error);
       }
     } finally {
       setPublishing(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -176,13 +107,16 @@ export default function DocItemEditorPage() {
         </Button>
         {status !== "PUBLISHED" && (
           <Button size="sm" onClick={handlePublish} disabled={publishing}>
-            {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+            {publishing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle className="h-4 w-4 mr-1" />
+            )}
             Publish
           </Button>
         )}
       </div>
 
-      {/* Metadata row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="flex flex-col gap-1">
           <Label className="text-xs">Title</Label>
@@ -205,14 +139,18 @@ export default function DocItemEditorPage() {
           >
             <option value="">No section</option>
             {sections.map((s) => (
-              <option key={s.id} value={s.id}>{s.title}</option>
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Split-pane editor */}
-      <div className="grid grid-cols-2 gap-4 flex-1 min-h-0" style={{ height: "calc(100vh - 240px)" }}>
+      <div
+        className="grid grid-cols-2 gap-4 flex-1 min-h-0"
+        style={{ height: "calc(100vh - 240px)" }}
+      >
         <div className="flex flex-col gap-1 h-full">
           <Label className="text-xs">MDX Content</Label>
           <textarea

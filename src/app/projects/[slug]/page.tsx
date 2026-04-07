@@ -6,13 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Github, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { ProjectItemType } from "@prisma/client";
+import { getAllProjectSlugs } from "@/services/project.service";
 
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const { findAllProjectSlugs } = await import("@/repositories/project.repository");
-  const slugs = await findAllProjectSlugs();
+  const slugs = await getAllProjectSlugs();
   return slugs.map((p) => ({ slug: p.slug }));
 }
 
@@ -31,8 +30,8 @@ export default async function ProjectOverviewPage(props: {
     throw err;
   }
 
-  const docCount = items.filter((i) => i.type === ProjectItemType.DOC).length;
-  const postCount = items.filter((i) => i.type === ProjectItemType.POST).length;
+  const docCount = items.filter((i) => i.type === "DOC").length;
+  const postCount = items.filter((i) => i.type === "POST").length;
 
   return (
     <article className="max-w-3xl">

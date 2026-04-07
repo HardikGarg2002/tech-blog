@@ -8,6 +8,7 @@ import { SearchResult } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
+import { runSiteSearch } from "@/actions/search";
 
 export function SearchModal() {
   const [open, setOpen] = useState(false);
@@ -34,10 +35,12 @@ export function SearchModal() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      if (data.success) {
-        setResults(data.data);
+      const result = await runSiteSearch(q);
+      if (result.ok) {
+        setResults(result.data);
+      } else {
+        setResults([]);
+        console.error("Search error:", result.error);
       }
     } catch (error) {
       console.error("Search error:", error);

@@ -114,3 +114,8 @@ export async function getItemById(id: string) {
 export async function getAllDocItems() {
   return itemRepo.findAllDocItems();
 }
+
+/** Static params for `/projects/[slug]/[itemSlug]` — delegates to repository via service only. */
+export async function getAllPublishedProjectItemParams() {
+  return itemRepo.findAllPublishedItems();
+}
