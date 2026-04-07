@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { toSlug, uniqueSlug } from "@/lib/slugify";
+import { uniqueSlug } from "@/lib/slugify";
 import { Errors } from "@/lib/errors";
 import * as categoryRepo from "@/repositories/category.repository";
 
@@ -32,7 +32,7 @@ export async function updateCategory(id: string, input: Partial<z.infer<typeof c
   const cat = await categoryRepo.findCategoryById(id);
   if (!cat) throw Errors.NOT_FOUND("Category", id);
 
-  return categoryRepo.updateCategory(id, input as any);
+  return categoryRepo.updateCategory(id, input);
 }
 
 export async function deleteCategory(id: string) {
@@ -51,4 +51,8 @@ export async function getCategoryWithPosts(slug: string) {
   const cat = await categoryRepo.findCategoryBySlug(slug);
   if (!cat) throw Errors.NOT_FOUND("Category", slug);
   return cat;
+}
+
+export async function getDocItemsForCategory(categoryId: string) {
+  return categoryRepo.findPublishedDocItemsByCategory(categoryId);
 }

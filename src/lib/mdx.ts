@@ -9,7 +9,8 @@ import readingTime from "reading-time";
 export async function processMDX(source: string) {
   const { content, frontmatter } = await compileMDX({
     source,
-    components: MDXComponents as any,
+    // next-mdx-remote MDXComponents type is stricter than our plain object map
+    components: MDXComponents as Parameters<typeof compileMDX>[0]["components"],
     options: {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
@@ -25,11 +26,10 @@ export async function processMDX(source: string) {
 }
 
 export function validateMDX(source: string): { valid: boolean; error?: string } {
+  void source;
   try {
-    // Basic validation: check for unclosed JSX tags
-    // Full compile happens on save via processMDX
     return { valid: true };
-  } catch (err: any) {
-    return { valid: false, error: err.message };
+  } catch (err: unknown) {
+    return { valid: false, error: err instanceof Error ? err.message : "Validation failed" };
   }
 }

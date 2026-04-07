@@ -1,4 +1,4 @@
-import type { Post, Category, Tag, Project } from "@prisma/client";
+import type { Post, Category, Tag, Project, ProjectItem, ProjectSection } from "@prisma/client";
 
 export type PostWithRelations = Post & {
   categories: {
@@ -7,6 +7,7 @@ export type PostWithRelations = Post & {
   tags: {
     tag: Tag;
   }[];
+  linkedProject?: Project | null;
 };
 
 export type ProjectWithRelations = Project & {
@@ -14,6 +15,21 @@ export type ProjectWithRelations = Project & {
     category: Category;
   }[];
 };
+
+export type ProjectItemWithRelations = ProjectItem & {
+  section: ProjectSection | null;
+  post: PostWithRelations | null;
+};
+
+export type ProjectSectionWithItems = ProjectSection & {
+  items: ProjectItem[];
+};
+
+export type SidebarEntry =
+  | { kind: "item"; item: ProjectItemWithRelations }
+  | { kind: "section"; section: ProjectSectionWithItems; items: ProjectItemWithRelations[] };
+
+export type SidebarTree = SidebarEntry[];
 
 export type CategoryWithChildren = Category & {
   children?: Category[];

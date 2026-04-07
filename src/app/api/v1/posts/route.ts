@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PostType } from "@prisma/client";
 import { listPosts } from "@/services/post.service";
 import { AppError } from "@/lib/errors";
+
+function parsePostType(value: string | null): PostType | undefined {
+  if (!value) return undefined;
+  return (Object.values(PostType) as string[]).includes(value) ? (value as PostType) : undefined;
+}
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
+    const linkedProjectIdParam = searchParams.get("linkedProjectId");
     const result = await listPosts({
       page: Number(searchParams.get("page") ?? 1),
       perPage: Number(searchParams.get("perPage") ?? 10),
       categorySlug: searchParams.get("category") ?? undefined,
       tagSlug: searchParams.get("tag") ?? undefined,
+      type: parsePostType(searchParams.get("type")),
+      linkedProjectId: linkedProjectIdParam === "null" ? null : linkedProjectIdParam ?? undefined,
     });
     return NextResponse.json(result);
   } catch (err) {

@@ -23,6 +23,7 @@ export const createPostSchema = z.object({
   seoDesc: z.string().max(160).optional(),
   ogImage: z.string().url().optional().or(z.literal("")),
   slug: z.string().optional(),
+  type: z.enum(["CONCEPT", "TOOL", "PROJECT_WRITEUP"]).default("CONCEPT"),
 });
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
@@ -31,7 +32,7 @@ export async function createPost(input: CreatePostInput) {
   const parsed = createPostSchema.safeParse(input);
   if (!parsed.success) throw Errors.INVALID_INPUT(parsed.error.message);
 
-  const { title, body, tags = [], categories, slug: customSlug, ...rest } = parsed.data;
+  const { title, body, tags = [], categories, slug: customSlug, type, ...rest } = parsed.data;
 
   const slug = await uniqueSlug(
     customSlug ?? title,
@@ -50,6 +51,7 @@ export async function createPost(input: CreatePostInput) {
     title,
     body,
     slug,
+    type,
     readingTime: readMins,
     status: PostStatus.DRAFT,
     categories: {
@@ -141,4 +143,8 @@ export async function listPosts(args: postRepo.PostFindManyArgs) {
       totalPages: Math.ceil(total / perPage),
     },
   };
+}
+
+export async function getUnlinkedPosts() {
+  return postRepo.findUnlinkedPublishedPosts();
 }

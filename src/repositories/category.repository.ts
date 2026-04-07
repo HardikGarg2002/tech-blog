@@ -22,12 +22,40 @@ export async function findCategoryBySlug(slug: string) {
             include: {
               categories: { include: { category: true } },
               tags: { include: { tag: true } },
+              linkedProject: true,
+            },
+          },
+        },
+      },
+      projects: {
+        include: {
+          project: {
+            include: {
+              categories: { include: { category: true } },
+              items: { select: { id: true, type: true } },
             },
           },
         },
       },
       _count: { select: { posts: true } },
     },
+  });
+}
+
+export async function findPublishedDocItemsByCategory(categoryId: string) {
+  return prisma.projectItem.findMany({
+    where: {
+      type: "DOC",
+      status: "PUBLISHED",
+      project: {
+        categories: { some: { categoryId } },
+      },
+    },
+    include: {
+      project: true,
+      section: true,
+    },
+    orderBy: { order: "asc" },
   });
 }
 

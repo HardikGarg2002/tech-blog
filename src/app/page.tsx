@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listPosts } from "@/services/post.service";
 import { getAllCategories } from "@/services/category.service";
 import { PostCard } from "@/components/blog/PostCard";
+import { PostWithRelations } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Code } from "lucide-react";
 
@@ -13,7 +14,7 @@ export default async function HomePage() {
     getAllCategories(),
   ]);
 
-  const posts = postsResult.data;
+  const posts = postsResult.data as PostWithRelations[];
 
   return (
     <div className="flex flex-col gap-16 py-10">
@@ -51,7 +52,7 @@ export default async function HomePage() {
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.length > 0 ? (
-            posts.map((post) => <PostCard key={post.id} post={post as any} />)
+            posts.map((post) => <PostCard key={post.id} post={post} />)
           ) : (
             <div className="col-span-full py-12 text-center text-muted-foreground">
               No posts published yet.

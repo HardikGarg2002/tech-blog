@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { toSlug, uniqueSlug } from "@/lib/slugify";
+import { uniqueSlug } from "@/lib/slugify";
 import { Errors } from "@/lib/errors";
 import * as projectRepo from "@/repositories/project.repository";
 
@@ -43,4 +43,35 @@ export async function getProject(slug: string) {
   const project = await projectRepo.findProjectBySlug(slug);
   if (!project) throw Errors.NOT_FOUND("Project", slug);
   return project;
+}
+
+export async function getProjectById(id: string) {
+  const project = await projectRepo.findProjectById(id);
+  if (!project) throw Errors.NOT_FOUND("Project", id);
+  return project;
+}
+
+export async function updateProject(id: string, input: Partial<z.infer<typeof createProjectSchema>>) {
+  const project = await projectRepo.findProjectById(id);
+  if (!project) throw Errors.NOT_FOUND("Project", id);
+
+  const { categories, ...rest } = input;
+
+  await projectRepo.updateProject(id, {
+    ...rest,
+    ...(categories && {
+      categories: {
+        deleteMany: {},
+        create: categories.map((categoryId) => ({ categoryId })),
+      },
+    }),
+  });
+
+  return projectRepo.findProjectById(id);
+}
+
+export async function deleteProject(id: string) {
+  const project = await projectRepo.findProjectById(id);
+  if (!project) throw Errors.NOT_FOUND("Project", id);
+  await projectRepo.deleteProject(id);
 }

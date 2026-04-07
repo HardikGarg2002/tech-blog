@@ -15,6 +15,13 @@ export async function findProjectBySlug(slug: string) {
   });
 }
 
+export async function findProjectById(id: string) {
+  return prisma.project.findUnique({
+    where: { id },
+    include: { categories: { include: { category: true } } },
+  });
+}
+
 export async function createProject(data: Prisma.ProjectUncheckedCreateInput) {
   return prisma.project.create({ data });
 }

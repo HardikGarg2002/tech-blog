@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Search, SearchIcon, Loader2, Command, FileText, Code } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,6 @@ export function SearchModal() {
   const debouncedQuery = useDebounce(query, 300);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -121,7 +119,9 @@ export function SearchModal() {
           ) : query && !loading ? (
             <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground gap-3">
               <Command className="h-10 w-10 opacity-20" />
-              <p>No results found for "{query}".</p>
+              <p>
+                No results found for <span className="font-medium text-foreground">{query}</span>.
+              </p>
             </div>
           ) : (
             <div className="p-8 text-center text-sm text-muted-foreground">

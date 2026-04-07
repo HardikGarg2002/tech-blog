@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { listPosts } from "@/services/post.service";
 import { getAllProjects } from "@/services/project.service";
 import { AppError } from "@/lib/errors";
+import { PostWithRelations, ProjectWithRelations } from "@/types";
 import Fuse from "fuse.js";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -44,23 +45,23 @@ export async function GET(req: NextRequest) {
       getAllProjects(),
     ]);
 
-    const formattedPosts = postsData.data.map((p: any) => ({
+    const formattedPosts = (postsData.data as PostWithRelations[]).map((p) => ({
       id: p.id,
       title: p.title,
       slug: p.slug,
       excerpt: p.excerpt,
       type: "post" as const,
-      categories: p.categories.map((cp: any) => cp.category.name),
-      tags: p.tags.map((tp: any) => tp.tag.name),
+      categories: p.categories.map((cp) => cp.category.name),
+      tags: p.tags.map((tp) => tp.tag.name),
     }));
 
-    const formattedProjects = projects.map((p: any) => ({
+    const formattedProjects = (projects as ProjectWithRelations[]).map((p) => ({
       id: p.id,
       title: p.name,
       slug: p.slug,
       excerpt: p.description,
       type: "project" as const,
-      categories: p.categories.map((cp: any) => cp.category.name),
+      categories: p.categories.map((cp) => cp.category.name),
       tags: p.techStack,
     }));
 

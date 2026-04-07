@@ -20,9 +20,9 @@ export function TableOfContents() {
       .map((el) => ({
         id: el.id,
         text: (el as HTMLElement).innerText,
-        level: parseInt(el.tagName.replace("H", "")),
+        level: parseInt(el.tagName.replace("H", ""), 10),
       }));
-    setHeadings(elements);
+    queueMicrotask(() => setHeadings(elements));
 
     // Set active heading based on scroll position
     const observer = new IntersectionObserver(

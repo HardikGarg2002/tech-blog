@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { PostStatus, Prisma } from "@prisma/client";
+import { PostStatus, PostType, Prisma } from "@prisma/client";
 
 export type PostFindManyArgs = {
   status?: PostStatus;
@@ -7,6 +7,8 @@ export type PostFindManyArgs = {
   tagSlug?: string;
   page?: number;
   perPage?: number;
+  type?: PostType;
+  linkedProjectId?: string | null;
 };
 
 export async function findManyPosts({
@@ -15,6 +17,8 @@ export async function findManyPosts({
   tagSlug,
   page = 1,
   perPage = 10,
+  type,
+  linkedProjectId,
 }: PostFindManyArgs) {
   const where: Prisma.PostWhereInput = {
     status,
@@ -24,12 +28,18 @@ export async function findManyPosts({
     ...(tagSlug && {
       tags: { some: { tag: { slug: tagSlug } } },
     }),
+    ...(type && { type }),
+    ...(linkedProjectId !== undefined && { linkedProjectId }),
   };
 
   const [posts, total] = await Promise.all([
     prisma.post.findMany({
       where,
-      include: { categories: { include: { category: true } }, tags: { include: { tag: true } } },
+      include: {
+        categories: { include: { category: true } },
+        tags: { include: { tag: true } },
+        linkedProject: true,
+      },
       orderBy: { publishedAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,
@@ -43,14 +53,22 @@ export async function findManyPosts({
 export async function findPostBySlug(slug: string) {
   return prisma.post.findUnique({
     where: { slug },
-    include: { categories: { include: { category: true } }, tags: { include: { tag: true } } },
+    include: {
+      categories: { include: { category: true } },
+      tags: { include: { tag: true } },
+      linkedProject: true,
+    },
   });
 }
 
 export async function findPostById(id: string) {
   return prisma.post.findUnique({
     where: { id },
-    include: { categories: { include: { category: true } }, tags: { include: { tag: true } } },
+    include: {
+      categories: { include: { category: true } },
+      tags: { include: { tag: true } },
+      linkedProject: true,
+    },
   });
 }
 
@@ -80,4 +98,12 @@ export async function slugExists(slug: string) {
 
 export async function countPosts() {
   return prisma.post.groupBy({ by: ["status"], _count: { _all: true } });
+}
+
+export async function findUnlinkedPublishedPosts() {
+  return prisma.post.findMany({
+    where: { status: "PUBLISHED", linkedProjectId: null },
+    select: { id: true, title: true, slug: true, type: true },
+    orderBy: { publishedAt: "desc" },
+  });
 }

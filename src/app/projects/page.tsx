@@ -23,7 +23,7 @@ export default async function ProjectsPage() {
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold tracking-tight">Technical Projects</h1>
           <p className="text-muted-foreground text-lg max-w-[800px]">
-            A showcase of systems, tools, and experiments I've built. Most are
+            A showcase of systems, tools, and experiments I&apos;ve built. Most are
             open-source and documented here.
           </p>
         </div>
