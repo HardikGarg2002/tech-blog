@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { SearchModal } from "@/components/search/SearchModal";
-import { ThemeToggle } from "./ThemeToggle";
+import { HeaderActions } from "./HeaderActions";
 
 export function Header() {
   return (
@@ -22,10 +21,7 @@ export function Header() {
             </Link>
           </nav>
         </div>
-        <div className="flex items-center gap-2">
-          <SearchModal />
-          <ThemeToggle />
-        </div>
+        <HeaderActions />
       </div>
     </header>
   );

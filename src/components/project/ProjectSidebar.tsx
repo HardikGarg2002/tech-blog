@@ -1,19 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { buildSidebarTree } from "@/lib/sidebar";
-import { ProjectItemWithRelations, ProjectSectionWithItems } from "@/types";
+import type { ProjectItemWithRelations, ProjectSectionWithItems } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface ProjectSidebarProps {
   items: ProjectItemWithRelations[];
   sections: ProjectSectionWithItems[];
   projectSlug: string;
+  /** When set, overrides URL-derived active item (e.g. Storybook). Otherwise derived from `usePathname`. */
   activeSlug?: string;
 }
 
-export function ProjectSidebar({ items, sections, projectSlug, activeSlug }: ProjectSidebarProps) {
+function activeSlugFromPathname(pathname: string | null, projectSlug: string): string | undefined {
+  if (!pathname) return undefined;
+  const base = `/projects/${projectSlug}`;
+  if (pathname === base || pathname === `${base}/`) return undefined;
+  if (!pathname.startsWith(`${base}/`)) return undefined;
+  const rest = pathname.slice(base.length + 1);
+  const segment = rest.split("/")[0];
+  return segment || undefined;
+}
+
+export function ProjectSidebar({ items, sections, projectSlug, activeSlug: activeSlugProp }: ProjectSidebarProps) {
+  const pathname = usePathname();
+  const activeSlug = activeSlugProp ?? activeSlugFromPathname(pathname, projectSlug);
+
   const tree = buildSidebarTree(items, sections);
 
   return (
@@ -22,7 +37,7 @@ export function ProjectSidebar({ items, sections, projectSlug, activeSlug }: Pro
         href={`/projects/${projectSlug}`}
         className={cn(
           "flex items-center px-3 py-2 text-sm rounded-md transition-colors hover:bg-muted",
-          !activeSlug && "bg-muted font-medium border-l-2 border-primary pl-[10px]"
+          !activeSlug && "bg-muted font-medium border-l-2 border-primary pl-[10px]",
         )}
       >
         Overview
@@ -38,7 +53,7 @@ export function ProjectSidebar({ items, sections, projectSlug, activeSlug }: Pro
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors hover:bg-muted",
-                isActive && "bg-muted font-medium border-l-2 border-primary pl-[10px]"
+                isActive && "bg-muted font-medium border-l-2 border-primary pl-[10px]",
               )}
             >
               <span className="flex-1 truncate">{entry.item.title ?? entry.item.post?.title}</span>
@@ -65,7 +80,7 @@ export function ProjectSidebar({ items, sections, projectSlug, activeSlug }: Pro
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-2 pl-5 pr-3 py-2 text-sm rounded-md transition-colors hover:bg-muted",
-                    isActive && "bg-muted font-medium border-l-2 border-primary pl-[18px]"
+                    isActive && "bg-muted font-medium border-l-2 border-primary pl-[18px]",
                   )}
                 >
                   <span className="flex-1 truncate">{item.title ?? item.post?.title}</span>
