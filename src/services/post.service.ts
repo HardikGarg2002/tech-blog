@@ -148,3 +148,16 @@ export async function listPosts(args: postRepo.PostFindManyArgs) {
 export async function getUnlinkedPosts() {
   return postRepo.findUnlinkedPublishedPosts();
 }
+
+export async function getAdminAllPosts(args: { page?: number; perPage?: number; status?: PostStatus } = {}) {
+  const page = args.page ?? 1;
+  const perPage = args.perPage ?? 20;
+  return postRepo.findManyPosts({ page, perPage, status: args.status });
+}
+
+export async function getAdminPost(id: string) {
+  const post = await postRepo.findPostById(id);
+  if (!post) throw Errors.NOT_FOUND("Post", id);
+  return post;
+}
+
