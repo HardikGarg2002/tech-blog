@@ -285,3 +285,33 @@ export async function publishDocItemFromEditor(
     return actionError(err);
   }
 }
+
+export async function createAdminProject(
+  input: Parameters<typeof projectService.createProject>[0],
+): Promise<ActionResult<{ id: string; slug: string }>> {
+  const gate = await requireAdmin();
+  if (!gate.ok) return gate;
+
+  try {
+    const project = await projectService.createProject(input);
+    return { ok: true, data: { id: project.id, slug: project.slug } };
+  } catch (err) {
+    return actionError(err);
+  }
+}
+
+export async function updateAdminProject(
+  id: string,
+  input: Parameters<typeof projectService.updateProject>[1],
+): Promise<ActionResult<void>> {
+  const gate = await requireAdmin();
+  if (!gate.ok) return gate;
+
+  try {
+    await projectService.updateProject(id, input);
+    return { ok: true, data: undefined };
+  } catch (err) {
+    return actionError(err);
+  }
+}
+
