@@ -49,3 +49,15 @@ export async function archiveProject(id: string) {
 export async function findAllProjectSlugs() {
   return prisma.project.findMany({ select: { slug: true, updatedAt: true } });
 }
+
+export async function countProjects() {
+  return prisma.project.groupBy({ by: ["status"], _count: { _all: true } });
+}
+
+export async function findRecentProjects(limit = 5) {
+  return prisma.project.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: { id: true, name: true, slug: true, status: true, createdAt: true },
+  });
+}

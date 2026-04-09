@@ -115,3 +115,7 @@ export async function findAllCategoriesWithCounts() {
   });
 }
 
+export async function countCategories() {
+  return prisma.category.count();
+}
+

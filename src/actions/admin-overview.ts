@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getDashboardStats } from "@/services/admin.service";
 import { actionError, type ActionResult } from "./action-result";
 
 async function requireAdmin(): Promise<ActionResult<never> | { ok: true }> {
@@ -41,42 +41,10 @@ export async function loadDashboardStats(): Promise<ActionResult<DashboardStats>
   if (!gate.ok) return gate;
 
   try {
-    const [postGroups, projectGroups, totalCategories, totalMedia, recentPosts, recentProjects] =
-      await Promise.all([
-        prisma.post.groupBy({ by: ["status"], _count: { _all: true } }),
-        prisma.project.groupBy({ by: ["status"], _count: { _all: true } }),
-        prisma.category.count(),
-        prisma.media.count(),
-        prisma.post.findMany({
-          orderBy: { createdAt: "desc" },
-          take: 5,
-          select: { id: true, title: true, slug: true, status: true, createdAt: true },
-        }),
-        prisma.project.findMany({
-          orderBy: { createdAt: "desc" },
-          take: 5,
-          select: { id: true, name: true, slug: true, status: true, createdAt: true },
-        }),
-      ]);
-
-    const postCount = (status: string) =>
-      postGroups.find((g) => g.status === status)?._count._all ?? 0;
-    const projectCount = (status: string) =>
-      projectGroups.find((g) => g.status === status)?._count._all ?? 0;
-
+    const stats = await getDashboardStats();
     return {
       ok: true,
-      data: {
-        totalPosts: postGroups.reduce((s: number, g) => s + g._count._all, 0),
-        publishedPosts: postCount("PUBLISHED"),
-        draftPosts: postCount("DRAFT"),
-        totalProjects: projectGroups.reduce((s: number, g) => s + g._count._all, 0),
-        activeProjects: projectCount("ACTIVE"),
-        totalCategories,
-        totalMedia,
-        recentPosts,
-        recentProjects,
-      },
+      data: stats,
     };
   } catch (err) {
     return actionError(err);

@@ -101,6 +101,14 @@ export async function countPosts() {
   return prisma.post.groupBy({ by: ["status"], _count: { _all: true } });
 }
 
+export async function findRecentPosts(limit = 5) {
+  return prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: { id: true, title: true, slug: true, status: true, createdAt: true },
+  });
+}
+
 export async function findUnlinkedPublishedPosts() {
   return prisma.post.findMany({
     where: { status: "PUBLISHED", linkedProjectId: null },

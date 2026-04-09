@@ -30,3 +30,7 @@ export async function deleteOrphanedMedia(olderThanDays = 30) {
   });
 }
 
+export async function countMedia() {
+  return prisma.media.count();
+}
+
