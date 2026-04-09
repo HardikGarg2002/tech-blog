@@ -14,6 +14,14 @@ export async function findAllMedia() {
   return prisma.media.findMany({ orderBy: { createdAt: "desc" } });
 }
 
+export async function findMediaById(id: string) {
+  return prisma.media.findUnique({ where: { id } });
+}
+
+export async function deleteMedia(id: string) {
+  return prisma.media.delete({ where: { id } });
+}
+
 export async function deleteOrphanedMedia(olderThanDays = 30) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - olderThanDays);
@@ -21,3 +29,4 @@ export async function deleteOrphanedMedia(olderThanDays = 30) {
     where: { linkedTo: null, createdAt: { lt: cutoff } },
   });
 }
+

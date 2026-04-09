@@ -1,16 +1,22 @@
 import { Errors } from "@/lib/errors";
 import * as mediaRepo from "@/repositories/media.repository";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+  "application/pdf",
+];
+const MAX_BYTES = 10 * 1024 * 1024; // 10MB
 
-export async function uploadMedia(file: File): Promise<{ url: string }> {
+export async function uploadMedia(file: File) {
   if (!ALLOWED_TYPES.includes(file.type))
     throw Errors.UPLOAD_REJECTED(`File type not allowed: ${file.type}`);
   if (file.size > MAX_BYTES)
-    throw Errors.UPLOAD_REJECTED(`File too large: ${file.size} bytes (max 5MB)`);
+    throw Errors.UPLOAD_REJECTED(`File too large: ${file.size} bytes (max 10MB)`);
 
-  // Upload to S3-compatible storage
   const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
   const client = new S3Client({
     region: "auto",
@@ -35,12 +41,20 @@ export async function uploadMedia(file: File): Promise<{ url: string }> {
 
   const url = `${process.env.STORAGE_ENDPOINT}/${process.env.STORAGE_BUCKET}/${filename}`;
 
-  await mediaRepo.createMediaRecord({
+  const record = await mediaRepo.createMediaRecord({
     url,
     filename,
     mimeType: file.type,
     sizeBytes: file.size,
   });
 
-  return { url };
+  return record;
+}
+
+export async function listMedia() {
+  return mediaRepo.findAllMedia();
+}
+
+export async function deleteMedia(id: string) {
+  return mediaRepo.deleteMedia(id);
 }
