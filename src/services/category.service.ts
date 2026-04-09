@@ -56,3 +56,8 @@ export async function getCategoryWithPosts(slug: string) {
 export async function getDocItemsForCategory(categoryId: string) {
   return categoryRepo.findPublishedDocItemsByCategory(categoryId);
 }
+
+export async function getAllCategoriesWithCounts() {
+  return categoryRepo.findAllCategoriesWithCounts();
+}
+

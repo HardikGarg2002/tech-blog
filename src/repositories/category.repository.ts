@@ -104,3 +104,14 @@ export async function categorySlugExists(slug: string) {
   const cat = await prisma.category.findUnique({ where: { slug }, select: { id: true } });
   return !!cat;
 }
+
+export async function findAllCategoriesWithCounts() {
+  return prisma.category.findMany({
+    include: {
+      parent: { select: { id: true, name: true } },
+      _count: { select: { posts: true, projects: true } },
+    },
+    orderBy: { name: "asc" },
+  });
+}
+
