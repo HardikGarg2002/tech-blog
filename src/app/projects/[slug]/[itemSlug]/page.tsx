@@ -9,19 +9,9 @@ import { ProjectItemNav } from "@/components/project/ProjectItemNav";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getAllPublishedProjectItemParams } from "@/services/projectItem.service";
 import { ProjectItemWithRelations, ProjectSectionWithItems } from "@/types";
 
 export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const allItems = await getAllPublishedProjectItemParams();
-
-  return allItems.map((item) => ({
-    slug: item.project.slug,
-    itemSlug: item.slug,
-  }));
-}
 
 export default async function ProjectItemPage(props: {
   params: Promise<{ slug: string; itemSlug: string }>;

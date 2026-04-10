@@ -6,14 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Github, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { getAllProjectSlugs } from "@/services/project.service";
-
 export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const slugs = await getAllProjectSlugs();
-  return slugs.map((p) => ({ slug: p.slug }));
-}
 
 export default async function ProjectOverviewPage(props: {
   params: Promise<{ slug: string }>;

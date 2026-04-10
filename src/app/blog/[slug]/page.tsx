@@ -1,4 +1,4 @@
-import { getPublishedPost, getAllPublishedSlugs } from "@/services/post.service";
+import { getPublishedPost } from "@/services/post.service";
 import { notFound } from "next/navigation";
 import { processMDX } from "@/lib/mdx";
 import { format } from "date-fns";
@@ -10,11 +10,6 @@ import { AppError } from "@/lib/errors";
 import { PostWithRelations } from "@/types";
 
 export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const posts = await getAllPublishedSlugs();
-  return posts.map((post) => ({ slug: post.slug }));
-}
 
 export default async function BlogPostPage(props: {
   params: Promise<{ slug: string }>;

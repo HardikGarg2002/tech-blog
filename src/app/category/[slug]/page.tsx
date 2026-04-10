@@ -1,6 +1,5 @@
 import {
   getCategoryWithPosts,
-  getAllCategorySlugs,
   getDocItemsForCategory,
 } from "@/services/category.service";
 import { notFound } from "next/navigation";
@@ -24,11 +23,6 @@ type ProjectForCategory = ProjectWithRelations & {
   docCount: number;
   postCount: number;
 };
-
-export async function generateStaticParams() {
-  const categories = await getAllCategorySlugs();
-  return categories.map((cat) => ({ slug: cat.slug }));
-}
 
 export default async function CategoryPage(props: {
   params: Promise<{ slug: string }>;
