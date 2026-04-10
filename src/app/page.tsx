@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { listPosts } from "@/services/post.service";
 import { getAllCategories } from "@/services/category.service";
 import { PostCard } from "@/components/blog/PostCard";
@@ -9,6 +10,7 @@ import { ArrowRight, BookOpen, Code } from "lucide-react";
 export const revalidate = 60;
 
 export default async function HomePage() {
+  await connection();
   const [postsResult, categories] = await Promise.all([
     listPosts({ perPage: 3 }),
     getAllCategories(),

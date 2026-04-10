@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/card";
 import { ExternalLink, Github } from "lucide-react";
 import Link from "next/link";
+import { connection } from "next/server";
 
 export const revalidate = 60;
 
 export default async function ProjectsPage() {
+  await connection();
   const projects = await getListedProjects();
 
   return (
