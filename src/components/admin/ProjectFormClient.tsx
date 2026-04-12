@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,7 @@ const PROJECT_STATUSES = [
 
 export function ProjectFormClient({ categories, initialProject }: Props) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState(initialProject?.name ?? "");
   const [description, setDescription] = useState(initialProject?.description ?? "");
@@ -73,7 +73,7 @@ export function ProjectFormClient({ categories, initialProject }: Props) {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error("Name is required"); return; }
     if (!body.trim()) { toast.error("Overview body is required"); return; }
@@ -90,7 +90,8 @@ export function ProjectFormClient({ categories, initialProject }: Props) {
       categories: selectedCategories,
     };
 
-    startTransition(async () => {
+    setIsSubmitting(true);
+    try {
       if (isEditing) {
         const result = await updateAdminProject(initialProject.id, payload);
         if (result.ok) {
@@ -110,7 +111,9 @@ export function ProjectFormClient({ categories, initialProject }: Props) {
           toast.error(result.error);
         }
       }
-    });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -253,15 +256,15 @@ export function ProjectFormClient({ categories, initialProject }: Props) {
       </div>
 
       <div className="flex items-center gap-3 pt-2 border-t">
-        <Button type="submit" disabled={isPending}>
-          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           {isEditing ? "Save Changes" : "Create Project"}
         </Button>
         <Button
           type="button"
           variant="ghost"
           onClick={() => router.push("/admin/projects")}
-          disabled={isPending}
+          disabled={isSubmitting}
         >
           Cancel
         </Button>
