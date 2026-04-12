@@ -9,7 +9,7 @@ import {
   Clock,
   FolderOpen,
   Tag,
-  Image,
+  Image as ImageIcon,
   ArrowRight,
 } from "lucide-react";
 
@@ -17,11 +17,7 @@ export default async function AdminOverviewPage() {
   const result = await loadDashboardStats();
 
   if (!result.ok) {
-    return (
-      <div className="text-destructive text-sm">
-        Failed to load stats: {result.error}
-      </div>
-    );
+    return <div className="text-sm text-destructive">Failed to load stats: {result.error}</div>;
   }
 
   const stats = result.data;
@@ -30,19 +26,11 @@ export default async function AdminOverviewPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Overview of your content
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Overview of your content</p>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard
-          title="Total Posts"
-          value={stats.totalPosts}
-          icon={FileText}
-          accent="text-violet-500"
-        />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        <StatCard title="Total Posts" value={stats.totalPosts} icon={FileText} accent="text-violet-500" />
         <StatCard
           title="Published"
           value={stats.publishedPosts}
@@ -73,30 +61,28 @@ export default async function AdminOverviewPage() {
         <StatCard
           title="Media Files"
           value={stats.totalMedia}
-          icon={Image}
+          icon={ImageIcon}
           accent="text-cyan-500"
         />
       </div>
 
-      {/* Recent content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Posts */}
-        <div className="border rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/30">
-            <p className="font-semibold text-sm flex items-center gap-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="overflow-hidden rounded-xl border">
+          <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+            <p className="flex items-center gap-2 text-sm font-semibold">
               <FileText className="h-4 w-4 text-muted-foreground" />
               Recent Posts
             </p>
             <Link
               href="/admin/posts"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
             >
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="divide-y">
             {stats.recentPosts.length === 0 ? (
-              <div className="px-4 py-6 text-center text-muted-foreground text-sm">
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
                 No posts yet.{" "}
                 <Link href="/admin/posts/new" className="text-primary hover:underline">
                   Create one →
@@ -106,15 +92,15 @@ export default async function AdminOverviewPage() {
               stats.recentPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="px-4 py-3 flex items-center justify-between hover:bg-muted/20 transition-colors"
+                  className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/20"
                 >
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{post.title}</p>
+                    <p className="truncate text-sm font-medium">{post.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(post.createdAt), "MMM d, yyyy")}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                  <div className="ml-3 flex shrink-0 items-center gap-2">
                     <Badge
                       variant={post.status === "PUBLISHED" ? "default" : "secondary"}
                       className="text-[10px]"
@@ -134,23 +120,22 @@ export default async function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Recent Projects */}
-        <div className="border rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/30">
-            <p className="font-semibold text-sm flex items-center gap-2">
+        <div className="overflow-hidden rounded-xl border">
+          <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+            <p className="flex items-center gap-2 text-sm font-semibold">
               <FolderOpen className="h-4 w-4 text-muted-foreground" />
               Recent Projects
             </p>
             <Link
               href="/admin/projects"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
             >
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="divide-y">
             {stats.recentProjects.length === 0 ? (
-              <div className="px-4 py-6 text-center text-muted-foreground text-sm">
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
                 No projects yet.{" "}
                 <Link href="/admin/projects/new" className="text-primary hover:underline">
                   Create one →
@@ -160,15 +145,15 @@ export default async function AdminOverviewPage() {
               stats.recentProjects.map((project) => (
                 <div
                   key={project.id}
-                  className="px-4 py-3 flex items-center justify-between hover:bg-muted/20 transition-colors"
+                  className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/20"
                 >
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{project.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">
+                    <p className="truncate text-sm font-medium">{project.name}</p>
+                    <p className="font-mono text-xs text-muted-foreground">
                       /projects/{project.slug}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                  <div className="ml-3 flex shrink-0 items-center gap-2">
                     <Badge
                       variant={project.status === "ACTIVE" ? "default" : "secondary"}
                       className="text-[10px]"
@@ -189,36 +174,35 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="border rounded-xl p-5">
-        <p className="font-semibold text-sm mb-4">Quick Actions</p>
+      <div className="rounded-xl border p-5">
+        <p className="mb-4 text-sm font-semibold">Quick Actions</p>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/posts/new"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             <FileText className="h-4 w-4" />
             New Post
           </Link>
           <Link
             href="/admin/projects/new"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium hover:bg-muted transition-colors"
+            className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
           >
             <FolderOpen className="h-4 w-4" />
             New Project
           </Link>
           <Link
             href="/admin/categories"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium hover:bg-muted transition-colors"
+            className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
           >
             <Tag className="h-4 w-4" />
             Manage Categories
           </Link>
           <Link
             href="/admin/media"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium hover:bg-muted transition-colors"
+            className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
           >
-            <Image className="h-4 w-4" />
+            <ImageIcon className="h-4 w-4" />
             Media Library
           </Link>
         </div>

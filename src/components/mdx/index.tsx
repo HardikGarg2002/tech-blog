@@ -125,12 +125,10 @@ export function Step({
 }
 
 export function Steps({ children }: { children: ReactNode }) {
-  let n = 0;
-  const numbered = Children.map(children, (child) => {
+  const numbered = Children.toArray(children).map((child, index) => {
     if (!isValidElement(child)) return child;
     if (child.type !== Step) return child;
-    n += 1;
-    return cloneElement(child as ReactElement<{ number?: number }>, { number: n });
+    return cloneElement(child as ReactElement<{ number?: number }>, { number: index + 1 });
   });
 
   return <div className="my-8 flex flex-col gap-5">{numbered}</div>;

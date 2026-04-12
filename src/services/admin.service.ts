@@ -3,6 +3,8 @@ import * as projectRepo from "@/repositories/project.repository";
 import * as categoryRepo from "@/repositories/category.repository";
 import * as mediaRepo from "@/repositories/media.repository";
 
+type CountGroup = { status: string; _count: { _all: number } };
+
 export async function getDashboardStats() {
   const [
     postGroups,
@@ -21,15 +23,18 @@ export async function getDashboardStats() {
   ]);
 
   const postCount = (status: string) =>
-    postGroups.find((g: any) => g.status === status)?._count._all ?? 0;
+    (postGroups as CountGroup[]).find((g) => g.status === status)?._count._all ?? 0;
   const projectCount = (status: string) =>
-    projectGroups.find((g: any) => g.status === status)?._count._all ?? 0;
+    (projectGroups as CountGroup[]).find((g) => g.status === status)?._count._all ?? 0;
 
   return {
-    totalPosts: postGroups.reduce((s: number, g: any) => s + g._count._all, 0),
+    totalPosts: (postGroups as CountGroup[]).reduce((sum, group) => sum + group._count._all, 0),
     publishedPosts: postCount("PUBLISHED"),
     draftPosts: postCount("DRAFT"),
-    totalProjects: projectGroups.reduce((s: number, g: any) => s + g._count._all, 0),
+    totalProjects: (projectGroups as CountGroup[]).reduce(
+      (sum, group) => sum + group._count._all,
+      0
+    ),
     activeProjects: projectCount("ACTIVE"),
     totalCategories,
     totalMedia,

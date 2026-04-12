@@ -5,8 +5,6 @@ import Link from "next/link";
 import { Edit } from "lucide-react";
 import { format } from "date-fns";
 
-type DocItemRow = Awaited<ReturnType<typeof getAllDocItems>>[number];
-
 export default async function AdminDocsPage() {
   const docs = await getAllDocItems();
 
@@ -17,35 +15,35 @@ export default async function AdminDocsPage() {
         <p className="text-sm text-muted-foreground">{docs.length} total doc pages</p>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      <div className="overflow-hidden rounded-lg border">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 border-b">
+          <thead className="border-b bg-muted/50">
             <tr>
-              <th className="text-left px-4 py-3 font-medium">Title</th>
-              <th className="text-left px-4 py-3 font-medium">Project</th>
-              <th className="text-left px-4 py-3 font-medium">Section</th>
-              <th className="text-left px-4 py-3 font-medium">Status</th>
-              <th className="text-left px-4 py-3 font-medium">Order</th>
-              <th className="text-left px-4 py-3 font-medium">Updated</th>
-              <th className="text-right px-4 py-3 font-medium">Actions</th>
+              <th className="px-4 py-3 text-left font-medium">Title</th>
+              <th className="px-4 py-3 text-left font-medium">Project</th>
+              <th className="px-4 py-3 text-left font-medium">Section</th>
+              <th className="px-4 py-3 text-left font-medium">Status</th>
+              <th className="px-4 py-3 text-left font-medium">Order</th>
+              <th className="px-4 py-3 text-left font-medium">Updated</th>
+              <th className="px-4 py-3 text-right font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {docs.map((doc) => (
-              <tr key={doc.id} className="hover:bg-muted/30 transition-colors">
+              <tr key={doc.id} className="transition-colors hover:bg-muted/30">
                 <td className="px-4 py-3">
-                  <p className="font-medium truncate max-w-[200px]">{doc.title}</p>
+                  <p className="max-w-[200px] truncate font-medium">{doc.title}</p>
                   <p className="text-xs text-muted-foreground">{doc.slug}</p>
                 </td>
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/projects/${doc.project.id}`}
-                    className="text-primary hover:underline text-xs"
+                    className="text-xs text-primary hover:underline"
                   >
                     {doc.project.name}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground text-xs">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {doc.section?.title ?? "—"}
                 </td>
                 <td className="px-4 py-3">
@@ -57,11 +55,11 @@ export default async function AdminDocsPage() {
                   </Badge>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{doc.order}</td>
-                <td className="px-4 py-3 text-muted-foreground text-xs">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {format(new Date(doc.updatedAt), "MMM d, yyyy")}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-1 justify-end">
+                  <div className="flex justify-end gap-1">
                     <Button asChild size="icon" variant="ghost" className="h-7 w-7">
                       <Link href={`/admin/projects/${doc.project.id}/items/${doc.id}/edit`}>
                         <Edit className="h-3.5 w-3.5" />

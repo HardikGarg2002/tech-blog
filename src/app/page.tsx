@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { connection } from "next/server";
 import { listPosts } from "@/services/post.service";
 import { getAllCategories } from "@/services/category.service";
 import { PostCard } from "@/components/blog/PostCard";
@@ -10,7 +9,6 @@ import { ArrowRight, BookOpen, Code } from "lucide-react";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  await connection();
   const [postsResult, categories] = await Promise.all([
     listPosts({ perPage: 3 }),
     getAllCategories(),
@@ -20,13 +18,14 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-16 py-10">
-      {/* Hero Section */}
       <section className="container flex flex-col items-center gap-6 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-          Notes on <span className="text-primary italic font-serif">Engineering</span> & Development
+          Notes on <span className="font-serif italic text-primary">Engineering</span> &
+          Development
         </h1>
         <p className="max-w-[700px] text-lg text-muted-foreground sm:text-xl">
-          A personal collection of technical documentation, architectural patterns, and project learnings.
+          A personal collection of technical documentation, architectural patterns, and project
+          learnings.
         </p>
         <div className="flex flex-wrap justify-center gap-4 py-4">
           <Button asChild size="lg">
@@ -42,7 +41,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Posts */}
       <section className="container">
         <div className="flex items-center justify-between pb-8">
           <h2 className="text-3xl font-bold tracking-tight">Recent Posts</h2>
@@ -63,9 +61,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories Grid */}
-      <section className="container bg-muted/50 py-16 -mx-4 px-4 sm:-mx-8 sm:px-8 md:rounded-3xl">
-        <div className="text-center pb-12">
+      <section className="container -mx-4 bg-muted/50 px-4 py-16 sm:-mx-8 sm:px-8 md:rounded-3xl">
+        <div className="pb-12 text-center">
           <h2 className="text-3xl font-bold tracking-tight">Browse by Category</h2>
           <p className="text-muted-foreground">Focused documentation across key domains.</p>
         </div>
@@ -83,7 +80,7 @@ export default async function HomePage() {
                 </span>
               </div>
               <h3 className="font-bold group-hover:text-primary">{cat.name}</h3>
-              <p className="text-xs text-muted-foreground line-clamp-2">
+              <p className="line-clamp-2 text-xs text-muted-foreground">
                 {cat.description || `Explore ${cat.name} related notes and projects.`}
               </p>
             </Link>

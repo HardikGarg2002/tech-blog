@@ -9,23 +9,38 @@ type Props = {
 };
 
 export function TableOfContents({ headings: headingsProp }: Props) {
-  const [headings, setHeadings] = useState<TocHeading[]>(headingsProp ?? []);
+  const [derivedHeadings, setDerivedHeadings] = useState<TocHeading[]>(() => {
+    if (typeof document === "undefined") {
+      return [];
+    }
+
+    return Array.from(document.querySelectorAll("h2, h3"))
+      .filter((el) => el.id)
+      .map((el) => ({
+        id: el.id,
+        text: (el as HTMLElement).innerText,
+        level: parseInt(el.tagName.replace("H", ""), 10),
+      }));
+  });
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
     if (headingsProp?.length) {
-      setHeadings(headingsProp);
-    } else {
-      const elements = Array.from(document.querySelectorAll("h2, h3"))
-        .filter((el) => el.id)
-        .map((el) => ({
-          id: el.id,
-          text: (el as HTMLElement).innerText,
-          level: parseInt(el.tagName.replace("H", ""), 10),
-        }));
-      queueMicrotask(() => setHeadings(elements));
+      return;
     }
+
+    const elements = Array.from(document.querySelectorAll("h2, h3"))
+      .filter((el) => el.id)
+      .map((el) => ({
+        id: el.id,
+        text: (el as HTMLElement).innerText,
+        level: parseInt(el.tagName.replace("H", ""), 10),
+      }));
+
+    queueMicrotask(() => setDerivedHeadings(elements));
   }, [headingsProp]);
+
+  const headings = headingsProp?.length ? headingsProp : derivedHeadings;
 
   useEffect(() => {
     const observer = new IntersectionObserver(

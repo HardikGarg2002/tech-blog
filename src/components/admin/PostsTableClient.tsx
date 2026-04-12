@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { Edit, CheckCircle, Trash2, Loader2, Eye } from "lucide-react";
 import { publishAdminPost, deleteAdminPost } from "@/actions/admin-posts";
 import { format } from "date-fns";

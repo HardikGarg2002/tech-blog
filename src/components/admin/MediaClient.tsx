@@ -2,7 +2,7 @@
 
 import { useState, useRef, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { Upload, Trash2, Copy, Loader2, Image as ImageIcon, FileText, File } from "lucide-react";
 import { format } from "date-fns";
 
