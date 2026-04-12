@@ -69,7 +69,9 @@ export default async function CategoryPage(props: {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
             {category.icon && <span className="text-4xl">{category.icon}</span>}
-            <h1 className="text-4xl font-bold tracking-tight">{category.name}</h1>
+            <h1 className="text-4xl font-bold tracking-tight">
+              {category.name}
+            </h1>
           </div>
           {category.description && (
             <p className="text-muted-foreground text-lg max-w-[800px]">
@@ -121,7 +123,9 @@ export default async function CategoryPage(props: {
               posts.map((post) => <PostCard key={post.id} post={post} />)
             ) : (
               <div className="col-span-full py-12 text-center">
-                <p className="text-muted-foreground">No posts found in this category.</p>
+                <p className="text-muted-foreground">
+                  No posts found in this category.
+                </p>
               </div>
             )}
           </div>

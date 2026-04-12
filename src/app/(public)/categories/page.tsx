@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import type { CategoryWithChildren } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Categories",
+  title: "Category Map",
   description:
     "Browse the full category map for posts, project documentation, and engineering notes.",
   alternates: {
-    canonical: "/categories",
+    canonical: "/category ",
   },
 };
 
@@ -41,12 +41,15 @@ export default async function CategoriesPage() {
     .filter((category) => !category.parent)
     .map((category) => ({
       ...category,
-      children: categories.filter((candidate) => candidate.parent?.id === category.id),
+      children: categories.filter(
+        (candidate) => candidate.parent?.id === category.id,
+      ),
     }));
 
   const nestedCategoryCount = categories.length - rootCategories.length;
-  const branchesWithChildren = rootCategories.filter((category) => category.children.length > 0)
-    .length;
+  const branchesWithChildren = rootCategories.filter(
+    (category) => category.children.length > 0,
+  ).length;
 
   return (
     <div className="container py-10 sm:py-12">
@@ -62,23 +65,34 @@ export default async function CategoriesPage() {
                   Browse the taxonomy behind the blog, docs, and project notes.
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                  Start with a broader theme, then drill into focused subcategories to find
-                  the exact slice of engineering work you want to read.
+                  Start with a broader theme, then drill into focused
+                  subcategories to find the exact slice of engineering work you
+                  want to read.
                 </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
-                  <p className="text-sm text-muted-foreground">Total categories</p>
-                  <p className="mt-2 text-3xl font-semibold">{categories.length}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total categories
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold">
+                    {categories.length}
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
-                  <p className="text-sm text-muted-foreground">Top-level themes</p>
-                  <p className="mt-2 text-3xl font-semibold">{rootCategories.length}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Top-level themes
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold">
+                    {rootCategories.length}
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
                   <p className="text-sm text-muted-foreground">Nested tracks</p>
-                  <p className="mt-2 text-3xl font-semibold">{nestedCategoryCount}</p>
+                  <p className="mt-2 text-3xl font-semibold">
+                    {nestedCategoryCount}
+                  </p>
                 </div>
               </div>
             </div>
@@ -92,7 +106,8 @@ export default async function CategoriesPage() {
                     Parent categories
                   </p>
                   <p className="text-sm leading-6 text-muted-foreground">
-                    Broad themes that group related posts, projects, and documentation.
+                    Broad themes that group related posts, projects, and
+                    documentation.
                   </p>
                 </div>
                 <div className="grid gap-1 border-b border-border/60 pb-4">
@@ -101,7 +116,8 @@ export default async function CategoriesPage() {
                     Nested branches
                   </p>
                   <p className="text-sm leading-6 text-muted-foreground">
-                    Subcategories that narrow the topic when a theme needs more structure.
+                    Subcategories that narrow the topic when a theme needs more
+                    structure.
                   </p>
                 </div>
                 <div className="grid gap-1">
@@ -110,7 +126,8 @@ export default async function CategoriesPage() {
                     Detail pages
                   </p>
                   <p className="text-sm leading-6 text-muted-foreground">
-                    Every category links to its own page with posts, projects, and docs.
+                    Every category links to its own page with posts, projects,
+                    and docs.
                   </p>
                 </div>
               </div>
@@ -121,10 +138,14 @@ export default async function CategoriesPage() {
         <section className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">All categories</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                All categories
+              </h2>
               <p className="text-sm text-muted-foreground">
-                {branchesWithChildren} {branchesWithChildren === 1 ? "theme has" : "themes have"}{" "}
-                nested branches. Open any category to see the full content inside it.
+                {branchesWithChildren}{" "}
+                {branchesWithChildren === 1 ? "theme has" : "themes have"}{" "}
+                nested branches. Open any category to see the full content
+                inside it.
               </p>
             </div>
             <Button asChild variant="outline" className="w-fit">
@@ -147,12 +168,16 @@ export default async function CategoriesPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-3xl">{category.icon || "*"}</span>
+                          <span className="text-3xl">
+                            {category.icon || "*"}
+                          </span>
                           <div>
                             <h3 className="text-2xl font-semibold tracking-tight">
                               {category.name}
                             </h3>
-                            <p className="text-sm text-muted-foreground">/{category.slug}</p>
+                            <p className="text-sm text-muted-foreground">
+                              /{category.slug}
+                            </p>
                           </div>
                         </div>
 
@@ -162,20 +187,35 @@ export default async function CategoriesPage() {
                         </p>
                       </div>
 
-                      <Button asChild variant="ghost" size="sm" className="shrink-0">
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="shrink-0"
+                      >
                         <Link href={`/category/${category.slug}`}>Open</Link>
                       </Button>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="rounded-full px-3 py-1">
-                        {category._count.posts} post{category._count.posts === 1 ? "" : "s"}
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full px-3 py-1"
+                      >
+                        {category._count.posts} post
+                        {category._count.posts === 1 ? "" : "s"}
                       </Badge>
-                      <Badge variant="secondary" className="rounded-full px-3 py-1">
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full px-3 py-1"
+                      >
                         {category._count.projects} project
                         {category._count.projects === 1 ? "" : "s"}
                       </Badge>
-                      <Badge variant="outline" className="rounded-full px-3 py-1">
+                      <Badge
+                        variant="outline"
+                        className="rounded-full px-3 py-1"
+                      >
                         {category.children.length} subcategor
                         {category.children.length === 1 ? "y" : "ies"}
                       </Badge>
@@ -198,8 +238,8 @@ export default async function CategoriesPage() {
                       </div>
                     ) : (
                       <div className="rounded-2xl border border-dashed border-border/70 bg-background/70 px-4 py-5 text-sm text-muted-foreground">
-                        No subcategories yet. This category works as a focused topic page on its
-                        own.
+                        No subcategories yet. This category works as a focused
+                        topic page on its own.
                       </div>
                     )}
                   </div>
@@ -208,9 +248,12 @@ export default async function CategoriesPage() {
             </div>
           ) : (
             <div className="rounded-[1.75rem] border border-dashed border-border/80 bg-muted/20 px-6 py-16 text-center">
-              <p className="text-lg font-medium">No categories are available yet.</p>
+              <p className="text-lg font-medium">
+                No categories are available yet.
+              </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Add categories from the admin dashboard to organize posts and projects.
+                Add categories from the admin dashboard to organize posts and
+                projects.
               </p>
             </div>
           )}
