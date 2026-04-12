@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { format } from "date-fns";
-import { PostWithRelations } from "@/types";
+import type { PostCardModel } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -12,12 +12,12 @@ import {
 } from "@/components/ui/card";
 import { ArrowUpRight, Clock, FolderOpen } from "lucide-react";
 
-function formatPostTypeLabel(type: PostWithRelations["type"]) {
+function formatPostTypeLabel(type: PostCardModel["type"]) {
   if (type === "PROJECT_WRITEUP") return "Project writeup";
   return type.charAt(0) + type.slice(1).toLowerCase();
 }
 
-export function PostCard({ post }: { post: PostWithRelations }) {
+export function PostCard({ post }: { post: PostCardModel }) {
   const publishedAt = post.publishedAt || post.createdAt;
   const tags = post.tags.slice(0, 3);
 

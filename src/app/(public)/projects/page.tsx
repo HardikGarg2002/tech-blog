@@ -23,10 +23,10 @@ export default async function ProjectsPage() {
     <div className="container py-10">
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
-          <h1 className="text-4xl font-bold tracking-tight">Technical Projects</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Projects</h1>
           <p className="text-muted-foreground text-lg max-w-[800px]">
-            A showcase of systems, tools, and experiments I&apos;ve built. Most are
-            open-source and documented here.
+            A showcase of systems, tools, and experiments I&apos;ve built. Most
+            are open-source and documented here.
           </p>
         </div>
 
@@ -47,7 +47,9 @@ export default async function ProjectsPage() {
                       ))}
                     </div>
                     <Badge
-                      variant={project.status === "ACTIVE" ? "default" : "secondary"}
+                      variant={
+                        project.status === "ACTIVE" ? "default" : "secondary"
+                      }
                     >
                       {project.status}
                     </Badge>
@@ -76,14 +78,22 @@ export default async function ProjectsPage() {
                   </Button>
                   {project.repoUrl && (
                     <Button asChild variant="ghost" size="icon">
-                      <a href={project.repoUrl} target="_blank" rel="noreferrer">
+                      <a
+                        href={project.repoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         <Github className="h-4 w-4" />
                       </a>
                     </Button>
                   )}
                   {project.liveUrl && (
                     <Button asChild variant="ghost" size="icon">
-                      <a href={project.liveUrl} target="_blank" rel="noreferrer">
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         <ExternalLink className="h-4 w-4" />
                       </a>
                     </Button>
@@ -93,7 +103,9 @@ export default async function ProjectsPage() {
             ))
           ) : (
             <div className="col-span-full py-24 text-center">
-              <p className="text-muted-foreground">No projects documented yet.</p>
+              <p className="text-muted-foreground">
+                No projects documented yet.
+              </p>
             </div>
           )}
         </div>

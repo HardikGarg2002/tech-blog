@@ -1,11 +1,52 @@
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { PostStatus } from "@prisma/client";
 import readingTime from "reading-time";
 import { toSlug, uniqueSlug } from "@/lib/slugify";
 import { Errors } from "@/lib/errors";
 import * as postRepo from "@/repositories/post.repository";
 import * as tagRepo from "@/repositories/tag.repository";
+
+/** Invalidates `unstable_cache` entries for public `listPosts` queries. */
+export const POSTS_LIST_CACHE_TAG = "posts-list";
+
+function stablePublishedListKey(args: postRepo.PostFindManyArgs): string {
+  const base: Record<string, unknown> = {
+    status: PostStatus.PUBLISHED,
+    page: args.page ?? 1,
+    perPage: args.perPage ?? 10,
+    categorySlug: args.categorySlug ?? null,
+    tagSlug: args.tagSlug ?? null,
+    type: args.type ?? null,
+    forCard: args.forCard ?? false,
+  };
+  if (args.linkedProjectId !== undefined) {
+    base.linkedProjectId = args.linkedProjectId;
+  }
+  return JSON.stringify(base);
+}
+
+function parsePublishedListKey(key: string): postRepo.PostFindManyArgs {
+  const row = JSON.parse(key) as Record<string, unknown>;
+  return {
+    status: PostStatus.PUBLISHED,
+    page: row.page as number,
+    perPage: row.perPage as number,
+    categorySlug: row.categorySlug === null ? undefined : (row.categorySlug as string),
+    tagSlug: row.tagSlug === null ? undefined : (row.tagSlug as string),
+    type: row.type === null ? undefined : (row.type as postRepo.PostFindManyArgs["type"]),
+    forCard: row.forCard === true,
+    ...(typeof row.linkedProjectId !== "undefined"
+      ? { linkedProjectId: row.linkedProjectId as string | null }
+      : {}),
+  };
+}
+
+const cachedPublishedPostList = unstable_cache(
+  async (argsKey: string) => postRepo.findManyPosts(parsePublishedListKey(argsKey)),
+  ["list-posts"],
+  { revalidate: 60, tags: [POSTS_LIST_CACHE_TAG] },
+);
 
 export async function getAllPublishedSlugs() {
   return postRepo.findAllPublishedSlugs();
@@ -96,6 +137,8 @@ export async function updatePost(id: string, input: Partial<CreatePostInput>) {
       : undefined,
   });
 
+  revalidateTag(POSTS_LIST_CACHE_TAG, "max");
+
   return postRepo.findPostById(id);
 }
 
@@ -110,6 +153,7 @@ export async function publishPost(id: string) {
 
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
+  revalidateTag(POSTS_LIST_CACHE_TAG, "max");
 
   return updated;
 }
@@ -122,6 +166,7 @@ export async function deletePost(id: string) {
 
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
+  revalidateTag(POSTS_LIST_CACHE_TAG, "max");
 }
 
 export async function getPublishedPost(slug: string) {
@@ -132,15 +177,19 @@ export async function getPublishedPost(slug: string) {
 }
 
 export async function listPosts(args: postRepo.PostFindManyArgs) {
-  const { posts, total } = await postRepo.findManyPosts({
-    ...args,
-    status: args.status ?? PostStatus.PUBLISHED,
-  });
-  const perPage = args.perPage ?? 10;
+  const status = args.status ?? PostStatus.PUBLISHED;
+  const merged: postRepo.PostFindManyArgs = { ...args, status };
+  const perPage = merged.perPage ?? 10;
+
+  const { posts, total } =
+    status === PostStatus.PUBLISHED
+      ? await cachedPublishedPostList(stablePublishedListKey(merged))
+      : await postRepo.findManyPosts(merged);
+
   return {
     data: posts,
     meta: {
-      page: args.page ?? 1,
+      page: merged.page ?? 1,
       perPage,
       total,
       totalPages: Math.ceil(total / perPage),

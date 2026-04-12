@@ -2,9 +2,8 @@ import { listPosts } from "@/services/post.service";
 import { PostCard } from "@/components/blog/PostCard";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { PostWithRelations } from "@/types";
+import type { PostCardModel } from "@/types";
 import { POST_TYPES, parsePostType } from "@/types/domain";
-import { connection } from "next/server";
 
 export const revalidate = 60;
 
@@ -38,7 +37,6 @@ function formatPostTypeLabel(type: (typeof POST_TYPES)[number]) {
 }
 
 export default async function BlogPage(props: PageProps<"/blog">) {
-  await connection();
   const searchParams = await props.searchParams;
   const typeParam = searchParams.type;
   const typeFilter = parsePostType(
@@ -50,8 +48,9 @@ export default async function BlogPage(props: PageProps<"/blog">) {
   const result = await listPosts({
     perPage: 100,
     type: typeFilter,
+    forCard: true,
   });
-  const allPosts = result.data as PostWithRelations[];
+  const allPosts = result.data as PostCardModel[];
 
   const posts = allPosts.filter((post) => {
     if (linkedFilter === "standalone") return !post.linkedProjectId;

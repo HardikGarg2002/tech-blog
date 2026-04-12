@@ -2,7 +2,7 @@ import Link from "next/link";
 import { listPosts } from "@/services/post.service";
 import { getAllCategories } from "@/services/category.service";
 import { PostCard } from "@/components/blog/PostCard";
-import { PostWithRelations } from "@/types";
+import type { PostCardModel } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Code } from "lucide-react";
 
@@ -10,11 +10,11 @@ export const revalidate = 60;
 
 export default async function HomePage() {
   const [postsResult, categories] = await Promise.all([
-    listPosts({ perPage: 3 }),
+    listPosts({ perPage: 3, forCard: true }),
     getAllCategories(),
   ]);
 
-  const posts = postsResult.data as PostWithRelations[];
+  const posts = postsResult.data as PostCardModel[];
 
   return (
     <div className="flex flex-col gap-16 py-10">

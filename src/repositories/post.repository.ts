@@ -10,7 +10,42 @@ export type PostFindManyArgs = {
   perPage?: number;
   type?: PostType;
   linkedProjectId?: string | null;
+  /** Omit heavy columns (`body`, SEO fields, full project) for list/card UIs. */
+  forCard?: boolean;
 };
+
+const postCardSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  excerpt: true,
+  status: true,
+  publishedAt: true,
+  updatedAt: true,
+  createdAt: true,
+  readingTime: true,
+  featuredImage: true,
+  imageAlt: true,
+  type: true,
+  linkedProjectId: true,
+  categories: {
+    select: {
+      category: true,
+    },
+  },
+  tags: {
+    select: {
+      tag: true,
+    },
+  },
+  linkedProject: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  },
+} satisfies Prisma.PostSelect;
 
 export async function findManyPosts({
   status,
@@ -20,6 +55,7 @@ export async function findManyPosts({
   perPage = 10,
   type,
   linkedProjectId,
+  forCard,
 }: PostFindManyArgs) {
   const where: Prisma.PostWhereInput = {
     ...(status !== undefined && { status }),
@@ -33,20 +69,27 @@ export async function findManyPosts({
     ...(linkedProjectId !== undefined && { linkedProjectId }),
   };
 
-  const [posts, total] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      include: {
-        categories: { include: { category: true } },
-        tags: { include: { tag: true } },
-        linkedProject: true,
-      },
-      orderBy: { publishedAt: "desc" },
-      skip: (page - 1) * perPage,
-      take: perPage,
-    }),
-    prisma.post.count({ where }),
-  ]);
+  const listQuery = forCard
+    ? prisma.post.findMany({
+        where,
+        select: postCardSelect,
+        orderBy: { publishedAt: "desc" },
+        skip: (page - 1) * perPage,
+        take: perPage,
+      })
+    : prisma.post.findMany({
+        where,
+        include: {
+          categories: { include: { category: true } },
+          tags: { include: { tag: true } },
+          linkedProject: true,
+        },
+        orderBy: { publishedAt: "desc" },
+        skip: (page - 1) * perPage,
+        take: perPage,
+      });
+
+  const [posts, total] = await Promise.all([listQuery, prisma.post.count({ where })]);
 
   return { posts, total };
 }

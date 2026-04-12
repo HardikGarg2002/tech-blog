@@ -1,18 +1,18 @@
 import Fuse from "fuse.js";
 import { listPosts } from "@/services/post.service";
 import { getListedProjects } from "@/services/project.service";
-import type { PostWithRelations, ProjectWithRelations, SearchResult } from "@/types";
+import type { PostCardModel, ProjectWithRelations, SearchResult } from "@/types";
 
 export async function performSiteSearch(query: string): Promise<SearchResult[]> {
   const q = query.trim();
   if (!q) return [];
 
   const [postsData, projects] = await Promise.all([
-    listPosts({ perPage: 100 }),
+    listPosts({ perPage: 100, forCard: true }),
     getListedProjects(),
   ]);
 
-  const formattedPosts = (postsData.data as PostWithRelations[]).map((p) => ({
+  const formattedPosts = (postsData.data as PostCardModel[]).map((p) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,

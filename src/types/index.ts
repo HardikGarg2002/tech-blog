@@ -1,4 +1,4 @@
-import type { Post, Category, Tag, Project, ProjectItem, ProjectSection } from "@prisma/client";
+import type { Post, Category, Tag, Project, ProjectItem, ProjectSection, PostType } from "@prisma/client";
 
 export type {
   AdminSectionOption,
@@ -18,6 +18,22 @@ export type PostWithRelations = Post & {
     tag: Tag;
   }[];
   linkedProject?: Project | null;
+};
+
+/** Fields required to render `PostCard` (listing / archive views). */
+export type PostCardModel = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  type: PostType;
+  publishedAt: Date | null;
+  createdAt: Date;
+  readingTime: number | null;
+  linkedProjectId: string | null;
+  categories: { category: Pick<Category, "id" | "name"> }[];
+  tags: { tag: Pick<Tag, "id" | "name"> }[];
+  linkedProject?: Pick<Project, "id" | "name" | "slug"> | null;
 };
 
 export type ProjectWithRelations = Project & {
