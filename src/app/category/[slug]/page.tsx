@@ -59,10 +59,10 @@ export default async function CategoryPage(props: {
   return (
     <div className="container py-10">
       <Link
-        href="/blog"
+        href="/categories"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
       >
-        <ArrowLeft className="mr-2 h-4 w-4" /> All posts
+        <ArrowLeft className="mr-2 h-4 w-4" /> All categories
       </Link>
 
       <div className="flex flex-col gap-12">

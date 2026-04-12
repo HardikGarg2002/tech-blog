@@ -2,7 +2,14 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { PostWithRelations } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ArrowUpRight, Clock, FolderOpen } from "lucide-react";
 
 function formatPostTypeLabel(type: PostWithRelations["type"]) {
@@ -26,16 +33,6 @@ export function PostCard({ post }: { post: PostWithRelations }) {
           </span>
         </div>
 
-        {post.linkedProject && (
-          <Link
-            href={`/projects/${post.linkedProject.slug}`}
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-          >
-            <FolderOpen className="h-3.5 w-3.5" />
-            Part of {post.linkedProject.name}
-          </Link>
-        )}
-
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span>{format(new Date(publishedAt), "MMM dd, yyyy")}</span>
@@ -55,7 +52,8 @@ export function PostCard({ post }: { post: PostWithRelations }) {
           </CardTitle>
 
           <CardDescription className="text-sm leading-7">
-            {post.excerpt || "Open the post to read the full note and implementation details."}
+            {post.excerpt ||
+              "Open the post to read the full note and implementation details."}
           </CardDescription>
         </div>
       </CardHeader>
@@ -68,6 +66,15 @@ export function PostCard({ post }: { post: PostWithRelations }) {
             </Badge>
           ))}
         </div>
+        {post.linkedProject && (
+          <Link
+            href={`/projects/${post.linkedProject.slug}`}
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+          >
+            <FolderOpen className="h-3.5 w-3.5" />
+            Project: {post.linkedProject.name}
+          </Link>
+        )}
       </CardContent>
 
       <CardFooter className="mt-auto flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-6">

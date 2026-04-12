@@ -132,7 +132,10 @@ export async function getPublishedPost(slug: string) {
 }
 
 export async function listPosts(args: postRepo.PostFindManyArgs) {
-  const { posts, total } = await postRepo.findManyPosts(args);
+  const { posts, total } = await postRepo.findManyPosts({
+    ...args,
+    status: args.status ?? PostStatus.PUBLISHED,
+  });
   const perPage = args.perPage ?? 10;
   return {
     data: posts,

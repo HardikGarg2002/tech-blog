@@ -13,7 +13,7 @@ export type PostFindManyArgs = {
 };
 
 export async function findManyPosts({
-  status = PostStatus.PUBLISHED,
+  status,
   categorySlug,
   tagSlug,
   page = 1,
@@ -22,7 +22,7 @@ export async function findManyPosts({
   linkedProjectId,
 }: PostFindManyArgs) {
   const where: Prisma.PostWhereInput = {
-    status,
+    ...(status !== undefined && { status }),
     ...(categorySlug && {
       categories: { some: { category: { slug: categorySlug } } },
     }),
