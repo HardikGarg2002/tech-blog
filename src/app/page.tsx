@@ -20,12 +20,13 @@ export default async function HomePage() {
     <div className="flex flex-col gap-16 py-10">
       <section className="container flex flex-col items-center gap-6 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-          Notes on <span className="font-serif italic text-primary">Engineering</span> &
+          Notes on{" "}
+          <span className="font-serif italic text-primary">Engineering</span> &
           Development
         </h1>
         <p className="max-w-[700px] text-lg text-muted-foreground sm:text-xl">
-          A personal collection of technical documentation, architectural patterns, and project
-          learnings.
+          A personal collection of technical documentation, architectural
+          patterns, and project learnings.
         </p>
         <div className="flex flex-wrap justify-center gap-4 py-4">
           <Button asChild size="lg">
@@ -63,14 +64,18 @@ export default async function HomePage() {
 
       <section className="container -mx-4 bg-muted/50 px-4 py-16 sm:-mx-8 sm:px-8 md:rounded-3xl">
         <div className="pb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight">Browse by Category</h2>
-          <p className="text-muted-foreground">Focused documentation across key domains.</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Browse by Category
+          </h2>
+          <p className="text-muted-foreground">
+            Focused documentation across key domains.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {categories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/category/${cat.slug}`}
+              href={`/categories/${cat.slug}`}
               className="group relative flex flex-col gap-2 rounded-xl border bg-background p-6 transition-all hover:border-primary hover:shadow-md"
             >
               <div className="flex items-center justify-between">
@@ -81,7 +86,8 @@ export default async function HomePage() {
               </div>
               <h3 className="font-bold group-hover:text-primary">{cat.name}</h3>
               <p className="line-clamp-2 text-xs text-muted-foreground">
-                {cat.description || `Explore ${cat.name} related notes and projects.`}
+                {cat.description ||
+                  `Explore ${cat.name} related notes and projects.`}
               </p>
             </Link>
           ))}

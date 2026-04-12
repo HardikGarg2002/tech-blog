@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     "Browse the full category map for posts, project documentation, and engineering notes.",
   alternates: {
-    canonical: "/category ",
+    canonical: "/categories ",
   },
 };
 
@@ -175,9 +175,6 @@ export default async function CategoriesPage() {
                             <h3 className="text-2xl font-semibold tracking-tight">
                               {category.name}
                             </h3>
-                            <p className="text-sm text-muted-foreground">
-                              /{category.slug}
-                            </p>
                           </div>
                         </div>
 
@@ -193,7 +190,7 @@ export default async function CategoriesPage() {
                         size="sm"
                         className="shrink-0"
                       >
-                        <Link href={`/category/${category.slug}`}>Open</Link>
+                        <Link href={`/categories/${category.slug}`}>Open</Link>
                       </Button>
                     </div>
 
@@ -228,7 +225,7 @@ export default async function CategoriesPage() {
                           {category.children.map((child) => (
                             <Link
                               key={child.id}
-                              href={`/category/${child.slug}`}
+                              href={`/categories/${child.slug}`}
                               className="rounded-full border border-border/70 bg-background px-3 py-1.5 text-sm transition-colors hover:border-primary/40 hover:bg-primary/[0.06]"
                             >
                               {child.name}

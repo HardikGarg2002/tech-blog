@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getProject } from "@/services/project.service";
-import { getProjectItemBySlug, getProjectSidebar } from "@/services/projectItem.service";
+import {
+  getProjectItemBySlug,
+  getProjectSidebar,
+} from "@/services/projectItem.service";
 import { getSectionsForProject } from "@/services/projectSection.service";
 import { AppError } from "@/lib/errors";
 import { processMDX } from "@/lib/mdx";
@@ -24,7 +27,7 @@ export default async function ProjectItemPage(props: {
     project = await getProject(slug);
     item = (await getProjectItemBySlug(
       project.id,
-      itemSlug
+      itemSlug,
     )) as ProjectItemWithRelations;
   } catch (err) {
     if (err instanceof AppError && err.code === "NOT_FOUND") notFound();
@@ -73,7 +76,7 @@ export default async function ProjectItemPage(props: {
 
       <div className="flex flex-wrap gap-2 mb-4">
         {post.categories.map(({ category }) => (
-          <Link key={category.id} href={`/category/${category.slug}`}>
+          <Link key={category.id} href={`/categories/${category.slug}`}>
             <Badge variant="secondary">{category.name}</Badge>
           </Link>
         ))}

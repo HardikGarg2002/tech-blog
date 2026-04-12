@@ -102,7 +102,7 @@ Categories are technology-based:
 | Tools & DX | VSCode setup post, Git workflow doc |
 | AI & ML | Prompting guide post, embedding search doc |
 
-A `/category/[slug]` page shows all content tagged with that category, grouped into three sections: Projects, Doc pages, Posts.
+A `/categories/[slug]` page shows all content tagged with that category, grouped into three sections: Projects, Doc pages, Posts.
 
 Categories support subcategories (e.g. Databases → PostgreSQL, Redis).
 
@@ -121,7 +121,7 @@ Project ──── Overview
                          │                   AND on /blog with badge
                          └── canonical URL always /blog/[slug]
 
-All content ──── tagged with categories ──── appear on /category/[slug]
+All content ──── tagged with categories ──── appear on /categories/[slug]
 ```
 
 ---

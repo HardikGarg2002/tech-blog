@@ -85,7 +85,7 @@ export default async function CategoryPage(props: {
             {category.children.map((child) => (
               <Link
                 key={child.id}
-                href={`/category/${child.slug}`}
+                href={`/categories/${child.slug}`}
                 className="px-4 py-2 rounded-full border bg-muted/50 hover:bg-muted text-sm transition-colors"
               >
                 {child.name}

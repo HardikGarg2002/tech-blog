@@ -9,16 +9,21 @@ interface CategoryBadgeProps {
   className?: string;
 }
 
-export function CategoryBadge({ name, slug, color, className }: CategoryBadgeProps) {
+export function CategoryBadge({
+  name,
+  slug,
+  color,
+  className,
+}: CategoryBadgeProps) {
   return (
-    <Link href={`/category/${slug}`}>
+    <Link href={`/categories/${slug}`}>
       <Badge
         style={{
           borderLeft: color ? `4px solid ${color}` : undefined,
         }}
         className={cn(
           "px-3 py-1 text-xs font-semibold bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer",
-          className
+          className,
         )}
       >
         {name}

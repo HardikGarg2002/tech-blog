@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: project.updatedAt,
     })),
     ...categories.map((category) => ({
-      url: `${siteConfig.url}/category/${category.slug}`,
+      url: `${siteConfig.url}/categories/${category.slug}`,
       lastModified: category.createdAt,
     })),
   ];
