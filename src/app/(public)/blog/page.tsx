@@ -40,8 +40,12 @@ function formatPostTypeLabel(type: (typeof POST_TYPES)[number]) {
 export default async function BlogPage(props: PageProps<"/blog">) {
   await connection();
   const searchParams = await props.searchParams;
-  const typeFilter = parsePostType(searchParams.type);
-  const linkedFilter = searchParams.linked;
+  const typeParam = searchParams.type;
+  const typeFilter = parsePostType(
+    Array.isArray(typeParam) ? typeParam[0] : typeParam
+  );
+  const linkedParam = searchParams.linked;
+  const linkedFilter = Array.isArray(linkedParam) ? linkedParam[0] : linkedParam;
 
   const result = await listPosts({
     perPage: 100,
