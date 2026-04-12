@@ -1,0 +1,8 @@
+.next
+node_modules
+out
+build
+pnpm-lock.yaml
+coverage
+*.min.js
+prisma/migrations
