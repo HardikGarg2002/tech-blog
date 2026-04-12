@@ -28,9 +28,6 @@ export function PostCard({ post }: { post: PostCardModel }) {
           <Badge variant="secondary" className="rounded-full px-3 py-1">
             {formatPostTypeLabel(post.type)}
           </Badge>
-          <span className="rounded-full border border-border/70 px-3 py-1 text-muted-foreground">
-            {post.linkedProject ? "Project-linked" : "Standalone"}
-          </span>
         </div>
 
         <div className="space-y-3">

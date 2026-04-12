@@ -7,24 +7,6 @@ import { POST_TYPES, parsePostType } from "@/types/domain";
 
 export const revalidate = 60;
 
-const SOURCE_FILTERS = [
-  {
-    label: "Everything",
-    description: "All published notes, essays, and build logs.",
-    linked: undefined,
-  },
-  {
-    label: "Standalone notes",
-    description: "Independent posts that are not tied to a project.",
-    linked: "standalone",
-  },
-  {
-    label: "Project writeups",
-    description: "Posts connected to a documented project.",
-    linked: "project",
-  },
-] as const;
-
 const TYPE_COPY: Record<(typeof POST_TYPES)[number], string> = {
   CONCEPT: "Ideas, architecture, and mental models.",
   TOOL: "Practical workflows, utilities, and implementation guides.",
@@ -42,9 +24,6 @@ export default async function BlogPage(props: PageProps<"/blog">) {
   const typeFilter = parsePostType(
     Array.isArray(typeParam) ? typeParam[0] : typeParam
   );
-  const linkedParam = searchParams.linked;
-  const linkedFilter = Array.isArray(linkedParam) ? linkedParam[0] : linkedParam;
-
   const result = await listPosts({
     perPage: 100,
     type: typeFilter,
@@ -52,17 +31,9 @@ export default async function BlogPage(props: PageProps<"/blog">) {
   });
   const allPosts = result.data as PostCardModel[];
 
-  const posts = allPosts.filter((post) => {
-    if (linkedFilter === "standalone") return !post.linkedProjectId;
-    if (linkedFilter === "project") return !!post.linkedProjectId;
-    return true;
-  });
-
   const standaloneCount = allPosts.filter((post) => !post.linkedProjectId).length;
   const projectCount = allPosts.length - standaloneCount;
 
-  const activeSource = SOURCE_FILTERS.find((filter) => filter.linked === linkedFilter)
-    ?? SOURCE_FILTERS[0];
   const activeTypeLabel = typeFilter ? formatPostTypeLabel(typeFilter) : "All formats";
 
   return (
@@ -125,54 +96,17 @@ export default async function BlogPage(props: PageProps<"/blog">) {
               <div className="space-y-1">
                 <h2 className="text-2xl font-semibold tracking-tight">Browse the archive</h2>
                 <p className="text-sm text-muted-foreground">
-                  Choose the source of the post first, then narrow by format if you want.
+                  Narrow by format when you want a specific kind of writing.
                 </p>
               </div>
               <p className="text-sm text-muted-foreground">
-                Showing <span className="font-medium text-foreground">{posts.length}</span>{" "}
-                result{posts.length === 1 ? "" : "s"} for{" "}
-                <span className="font-medium text-foreground">{activeSource.label}</span>
-                {" / "}
+                Showing <span className="font-medium text-foreground">{allPosts.length}</span>{" "}
+                result{allPosts.length === 1 ? "" : "s"} for{" "}
                 <span className="font-medium text-foreground">{activeTypeLabel}</span>
               </p>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-2">
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium">Source</p>
-                  <p className="text-sm text-muted-foreground">
-                    Separate standalone writing from posts that belong to a project.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {SOURCE_FILTERS.map((filter) => (
-                    <Link
-                      key={filter.label}
-                      href={{
-                        pathname: "/blog",
-                        query: {
-                          ...(filter.linked ? { linked: filter.linked } : {}),
-                          ...(typeFilter ? { type: typeFilter } : {}),
-                        },
-                      }}
-                      className={cn(
-                        "rounded-full border px-4 py-2 text-sm transition-colors",
-                        linkedFilter === filter.linked
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background hover:border-primary/40 hover:bg-primary/[0.06]"
-                      )}
-                    >
-                      {filter.label}
-                    </Link>
-                  ))}
-                </div>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {activeSource.description}
-                </p>
-              </div>
-
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <div>
                   <p className="text-sm font-medium">Format</p>
                   <p className="text-sm text-muted-foreground">
@@ -189,10 +123,7 @@ export default async function BlogPage(props: PageProps<"/blog">) {
                         key={type}
                         href={{
                           pathname: "/blog",
-                          query: {
-                            ...(linkedFilter ? { linked: linkedFilter } : {}),
-                            ...(value ? { type: value } : {}),
-                          },
+                          query: value ? { type: value } : {},
                         }}
                         className={cn(
                           "rounded-full border px-4 py-2 text-sm transition-colors",
@@ -209,7 +140,6 @@ export default async function BlogPage(props: PageProps<"/blog">) {
                 <p className="text-sm leading-6 text-muted-foreground">
                   {typeFilter ? TYPE_COPY[typeFilter] : "Show every post format together."}
                 </p>
-              </div>
             </div>
           </div>
         </section>
@@ -224,13 +154,13 @@ export default async function BlogPage(props: PageProps<"/blog">) {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {posts.length > 0 ? (
-            posts.map((post) => <PostCard key={post.id} post={post} />)
+          {allPosts.length > 0 ? (
+            allPosts.map((post) => <PostCard key={post.id} post={post} />)
           ) : (
             <div className="col-span-full rounded-[1.75rem] border border-dashed border-border/80 bg-muted/20 px-6 py-16 text-center">
               <p className="text-lg font-medium">No posts match this combination yet.</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Try switching the source or format filter to widen the archive.
+                Try switching the format filter to widen the archive.
               </p>
             </div>
           )}
