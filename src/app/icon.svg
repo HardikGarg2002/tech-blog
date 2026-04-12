@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Tech Blog">
+  <style>
+    .bg { fill: #fafafa; }
+    .fg { stroke: #171717; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #171717; }
+      .fg { stroke: #fafafa; }
+    }
+  </style>
+  <rect class="bg" width="32" height="32" rx="8" />
+  <path
+    class="fg"
+    fill="none"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    d="M11 10 7 16l4 6M21 10l4 6-4 6M14 22l4-12"
+  />
+</svg>
