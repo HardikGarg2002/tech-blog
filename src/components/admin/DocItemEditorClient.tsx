@@ -13,6 +13,7 @@ import {
   publishDocItemFromEditor,
   updateDocItemFields,
 } from "@/actions/admin-projects";
+import { MarkdownPreview } from "@/components/mdx/MarkdownPreview";
 
 type Props = {
   projectId: string;
@@ -162,8 +163,12 @@ export function DocItemEditorClient({ projectId, itemId, initial }: Props) {
         </div>
         <div className="flex flex-col gap-1 h-full">
           <Label className="text-xs">Preview</Label>
-          <div className="flex-1 border rounded px-4 py-3 overflow-auto bg-muted/20 prose prose-sm dark:prose-invert max-w-none text-sm">
-            <pre className="whitespace-pre-wrap text-xs text-muted-foreground font-mono">{body}</pre>
+          <div className="flex-1 border rounded px-4 py-3 overflow-auto bg-muted/20 text-sm">
+            {body.trim() ? (
+              <MarkdownPreview source={body} className="text-xs" />
+            ) : (
+              <p className="text-muted-foreground text-xs italic">Nothing to preview yet.</p>
+            )}
           </div>
         </div>
       </div>

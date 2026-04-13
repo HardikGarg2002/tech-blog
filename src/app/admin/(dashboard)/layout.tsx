@@ -9,8 +9,8 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   if (!session) redirect("/admin/login");
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r bg-muted/30 flex flex-col">
+    <div className="flex">
+      <aside className="w-56 shrink-0 border-r bg-muted/30 flex flex-col h-[calc(100vh-64px)]">
         <div className="p-4 border-b">
           <Link href="/admin" className="font-bold text-lg tracking-tight">
             Admin

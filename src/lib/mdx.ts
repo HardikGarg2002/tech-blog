@@ -14,7 +14,23 @@ export async function processMDX(source: string) {
     options: {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSanitize, rehypeSlug, rehypeAutolinkHeadings],
+        rehypePlugins: [
+          rehypeSanitize,
+          rehypeSlug,
+          [
+            rehypeAutolinkHeadings,
+            {
+              behavior: "append",
+              properties: {
+                className: [
+                  "ms-2 text-muted-foreground no-underline font-normal opacity-60 hover:opacity-100 text-[0.85em]",
+                ],
+                ariaLabel: "Link to this section",
+              },
+              content: { type: "text", value: "#" },
+            },
+          ],
+        ],
       },
       parseFrontmatter: true,
     },

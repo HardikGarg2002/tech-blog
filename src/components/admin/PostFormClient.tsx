@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/sonner";
 import { Loader2, X, Plus } from "lucide-react";
 import { createAdminPost, updateAdminPost } from "@/actions/admin-posts";
+import { MarkdownPreview } from "@/components/mdx/MarkdownPreview";
 
 type Category = { id: string; name: string };
 
@@ -186,11 +187,9 @@ export function PostFormClient({ categories, initialPost }: Props) {
                 />
               </TabsContent>
               <TabsContent value="preview">
-                <div className="border rounded-md p-4 min-h-[360px] bg-muted/20">
+                <div className="border rounded-md p-4 min-h-[360px] bg-muted/20 overflow-auto">
                   {body ? (
-                    <pre className="text-sm whitespace-pre-wrap font-sans text-foreground/80">
-                      {body}
-                    </pre>
+                    <MarkdownPreview source={body} className="text-sm" />
                   ) : (
                     <p className="text-muted-foreground text-sm italic">Nothing to preview yet.</p>
                   )}
