@@ -1,6 +1,6 @@
 import { getPublishedPost } from "@/services/post.service";
 import { notFound } from "next/navigation";
-import { processMDX } from "@/lib/mdx";
+import { ArticleMarkdown } from "@/components/mdx/ArticleMarkdown";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -25,8 +25,6 @@ export default async function BlogPostPage(props: {
     }
     throw err;
   }
-
-  const { content } = await processMDX(post.body);
 
   return (
     <article className="container max-w-3xl py-10">
@@ -83,9 +81,7 @@ export default async function BlogPostPage(props: {
 
         <Separator className="my-8" />
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
-          {content}
-        </div>
+        <ArticleMarkdown source={post.body} size="article" />
 
         <Separator className="my-12" />
 

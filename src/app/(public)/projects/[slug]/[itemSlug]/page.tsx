@@ -6,7 +6,7 @@ import {
 } from "@/services/projectItem.service";
 import { getSectionsForProject } from "@/services/projectSection.service";
 import { AppError } from "@/lib/errors";
-import { processMDX } from "@/lib/mdx";
+import { ArticleMarkdown } from "@/components/mdx/ArticleMarkdown";
 import { buildSidebarTree, flattenSidebarItems } from "@/lib/sidebar";
 import { ProjectItemNav } from "@/components/project/ProjectItemNav";
 import { Badge } from "@/components/ui/badge";
@@ -46,21 +46,16 @@ export default async function ProjectItemPage(props: {
   const next = currentIdx < flat.length - 1 ? flat[currentIdx + 1] : null;
 
   if (item.type === "DOC") {
-    const { content } = await processMDX(item.body ?? "");
-
     return (
       <article className="max-w-3xl">
         <h1 className="text-3xl font-bold tracking-tight mb-8">{item.title}</h1>
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
-          {content}
-        </div>
+        <ArticleMarkdown source={item.body ?? ""} size="article" />
         <ProjectItemNav prev={prev} next={next} projectSlug={slug} />
       </article>
     );
   }
 
   const post = item.post!;
-  const { content } = await processMDX(post.body);
 
   return (
     <article className="max-w-3xl">
@@ -88,9 +83,7 @@ export default async function ProjectItemPage(props: {
         <p className="text-lg text-muted-foreground mb-8">{post.excerpt}</p>
       )}
 
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        {content}
-      </div>
+      <ArticleMarkdown source={post.body} size="article" />
 
       <ProjectItemNav prev={prev} next={next} projectSlug={slug} />
     </article>
